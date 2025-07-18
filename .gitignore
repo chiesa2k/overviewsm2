@@ -1,0 +1,10 @@
+# Ambiente Virtual do Python
+venv/
+__pycache__/
+
+# Arquivos de Banco de Dados
+*.db
+*.sqlite3
+
+# Arquivos gerados
+dashboard.html
