@@ -54,3 +54,5 @@ def executar_processo_completo():
 # --- EXECUÇÃO PRINCIPAL ---
 if __name__ == "__main__":
     executar_processo_completo()
+
+# Versão final
