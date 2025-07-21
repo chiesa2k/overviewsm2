@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard de Resultados Operacionais</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio,line-clamp,container-queries"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
+        .data-card {
+            background-color: white; border-radius: 0.5rem; padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            display: flex; flex-direction: column; height: 100%;
+        }
+        .card-title { display: flex; align-items: center; font-size: 1.125rem; font-weight: 600; color: #1f2937; margin-bottom: 0.5rem; }
+        .card-title i { margin-right: 0.5rem; }
+        .total-value { font-size: 1.8rem; font-weight: 700; margin-bottom: 1rem; }
+        .pending-value { color: #dc2626; }
+        .chart-container { position: relative; flex-grow: 1; min-height: 180px; }
+        .monthly-data { border-top: 1px solid #e5e7eb; padding-top: 1rem; margin-top: 1rem; }
+        .monthly-data p { margin-bottom: 0.5rem; color: #4b5563; display: flex; justify-content: space-between; align-items: center; font-size: 0.875rem; }
+        .monthly-data span { font-weight: 500; }
+        .monthly-data .summary-line {
+            color: #374151; font-size: 0.9rem; margin-top: 0.75rem;
+            padding-top: 0.75rem; border-top: 1px dashed #d1d5db;
+        }
+        .card-subtitle-custom { color: #4b5563; margin-bottom: 0.25rem; font-size: 0.875rem; }
+        .card-main-metric { font-size: 1.8rem; font-weight: 700; color: #1f2937; margin-bottom: 1rem; }
+    </style>
+</head>
+<body class="p-6 md:p-10">
+
+    <header class="mb-8 flex items-center space-x-4">
+        <img src="https://i.postimg.cc/ydCgL04c/e4d3aeb7-dbb0-4a0a-b249-7859f2985440.png" alt="Logo da Empresa" class="h-10 md:h-12" onerror="this.style.display='none'">
+        <div>
+            <h1 class="text-2xl md:text-3xl font-bold text-gray-800">Dashboard de Resultados Operacionais (2025)</h1>
+            <p class="text-gray-600">Resumo dos indicadores até JUL.</p>
+        </div>
+    </header>
+
+    <main class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-6">
+        
+        <section class="data-card">
+            <h2 class="card-title"><i data-lucide="dollar-sign" style="color: #4f46e5;"></i>Faturamento</h2>
+            <div class="total-value" style="color: #16a34a;">R$ 26.392.912,18</div>
+            <div class="chart-container"><canvas id="faturamentoChart"></canvas></div>
+            <div class="monthly-data">
+                <p data-month="1">JAN: <span>R$ 3.051.082,16</span></p>
+                <p data-month="2">FEV: <span>R$ 4.596.221,51</span></p>
+                <p data-month="3">MAR: <span>R$ 1.982.499,84</span></p>
+                <p data-month="4">ABR: <span>R$ 3.982.318,07</span></p>
+                <p data-month="5">MAI: <span>R$ 4.056.071,92</span></p>
+                <p data-month="6">JUN: <span>R$ 5.143.314,38</span></p>
+                <p data-month="7">JUL: <span>R$ 3.581.404,30</span></p>
+                <p data-month="8">AGO: <span>R$ 0,00</span></p>
+                <p data-month="9">SET: <span>R$ 0,00</span></p>
+                <p data-month="10">OUT: <span>R$ 0,00</span></p>
+                <p data-month="11">NOV: <span>R$ 0,00</span></p>
+                <p data-month="12">DEZ: <span>R$ 0,00</span></p>
+                <p class="summary-line">Média Mensal: <span class="font-semibold">R$ 3.770.416,03</span></p>
+            </div>
+        </section>
+
+        <section class="data-card">
+            <h2 class="card-title"><i data-lucide="shopping-cart" style="color: #16a34a;"></i>Vendas</h2>
+            <div class="total-value" style="color: #16a34a;">R$ 25.638.077,09</div>
+            <div class="chart-container"><canvas id="vendasChart"></canvas></div>
+            <div class="monthly-data">
+                <p data-month="1">JAN: <span>R$ 3.532.621,29</span></p>
+                <p data-month="2">FEV: <span>R$ 5.905.478,50</span></p>
+                <p data-month="3">MAR: <span>R$ 1.573.321,99</span></p>
+                <p data-month="4">ABR: <span>R$ 5.037.318,39</span></p>
+                <p data-month="5">MAI: <span>R$ 3.691.021,37</span></p>
+                <p data-month="6">JUN: <span>R$ 3.456.996,64</span></p>
+                <p data-month="7">JUL: <span>R$ 2.441.318,91</span></p>
+                <p data-month="8">AGO: <span>R$ 0,00</span></p>
+                <p data-month="9">SET: <span>R$ 0,00</span></p>
+                <p data-month="10">OUT: <span>R$ 0,00</span></p>
+                <p data-month="11">NOV: <span>R$ 58.878,15</span></p>
+                <p data-month="12">DEZ: <span>R$ 0,00</span></p>
+                <p class="summary-line">Média Mensal: <span class="font-semibold">R$ 3.662.582,44</span></p>
+            </div>
+        </section>
+        
+        <section class="data-card">
+            <h2 class="card-title"><i data-lucide="alert-circle" style="color: #dc2626;"></i>BM Pendente</h2>
+            <p class="card-subtitle-custom">Quantidade Total (Histórico)</p>
+            <div class="card-main-metric">87</div>
+            <div class="chart-container"><canvas id="bmPendenteChart"></canvas></div>
+            <div class="monthly-data">
+                <p data-month="1">JAN: <span>9 itens</span></p>
+                <p data-month="2">FEV: <span>3 itens</span></p>
+                <p data-month="3">MAR: <span>4 itens</span></p>
+                <p data-month="4">ABR: <span>13 itens</span></p>
+                <p data-month="5">MAI: <span>14 itens</span></p>
+                <p data-month="6">JUN: <span>22 itens</span></p>
+                <p data-month="7">JUL: <span>22 itens</span></p>
+                <p data-month="8">AGO: <span>0 itens</span></p>
+                <p data-month="9">SET: <span>0 itens</span></p>
+                <p data-month="10">OUT: <span>0 itens</span></p>
+                <p data-month="11">NOV: <span>0 itens</span></p>
+                <p data-month="12">DEZ: <span>1 itens</span></p>
+                <p class="summary-line">Valor Total (Histórico): <span class="font-semibold pending-value">R$ 4.488.505,24</span></p>
+            </div>
+        </section>
+
+        <section class="data-card">
+            <h2 class="card-title"><i data-lucide="file-warning" style="color: #f97316;"></i>Relatórios Pendentes</h2>
+            <p class="card-subtitle-custom">Quantidade Total (Histórico)</p>
+            <div class="card-main-metric">32</div>
+            <div class="chart-container"><canvas id="relatoriosPendentesChart"></canvas></div>
+            <div class="monthly-data">
+                <p data-month="1">JAN: <span>4 itens</span></p>
+                <p data-month="2">FEV: <span>3 itens</span></p>
+                <p data-month="3">MAR: <span>3 itens</span></p>
+                <p data-month="4">ABR: <span>1 itens</span></p>
+                <p data-month="5">MAI: <span>6 itens</span></p>
+                <p data-month="6">JUN: <span>3 itens</span></p>
+                <p data-month="7">JUL: <span>12 itens</span></p>
+                <p data-month="8">AGO: <span>0 itens</span></p>
+                <p data-month="9">SET: <span>0 itens</span></p>
+                <p data-month="10">OUT: <span>0 itens</span></p>
+                <p data-month="11">NOV: <span>0 itens</span></p>
+                <p data-month="12">DEZ: <span>0 itens</span></p>
+                <p class="summary-line">Valor Total (Histórico): <span class="font-semibold pending-value">R$ 889.500,85</span></p>
+            </div>
+        </section>
+    </main>
+
+    <footer class="mt-6 text-center text-sm text-gray-500"> 
+        Última atualização: 18/07/2025. 
+    </footer>
+
+    <!-- O SCRIPT DOS GRÁFICOS ENTRA AQUI -->
+    
+    <script>
+        window.addEventListener('load', () => {
+            try {
+                const mesAtual = 7;
+                const todosOsMeses = ['JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN', 'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ'];
+                const chartLabels = todosOsMeses.slice(0, mesAtual);
+
+                const formatCurrency = (value) => (value || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                const formatInt = (value) => (value || 0).toLocaleString('pt-BR');
+                const formatAxisTick = (value, isCurrency = true) => {
+                    if (value >= 1000000) return (isCurrency ? 'R$ ' : '') + (value / 1000000).toFixed(1) + 'M';
+                    if (value >= 1000) return (isCurrency ? 'R$ ' : '') + (value / 1000).toFixed(0) + 'K';
+                    return isCurrency ? formatCurrency(value) : formatInt(value);
+                };
+
+                const baseChartOptions = { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: { callback: (val) => formatAxisTick(val, true) } }, x: { grid: { display: false } } }, plugins: { legend: {display: false}, tooltip: { callbacks: { label: (c) => `${c.dataset.label || ''}: ${formatCurrency(c.parsed.y)}` } } } };
+                const integerChartOptions = { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: { precision: 0, callback: (val) => formatAxisTick(val, false) } }, x: { grid: { display: false } } }, plugins: { legend: { display: false }, tooltip: { callbacks: { label: (c) => `${c.dataset.label || ''}: ${formatInt(c.parsed.y)}` } } } };
+
+                new Chart(document.getElementById('faturamentoChart'), { type: 'bar', data: { labels: chartLabels, datasets: [{ label: 'Faturamento', data: [3051082.160001084, 4596221.51, 1982499.8375, 3982318.0695, 4056071.92, 5143314.38, 3581404.3000000003, 0, 0, 0, 0, 0].slice(0, mesAtual), backgroundColor: 'rgba(79, 70, 229, 0.6)' }] }, options: baseChartOptions });
+                new Chart(document.getElementById('vendasChart'), { type: 'bar', data: { labels: chartLabels, datasets: [{ label: 'Vendas', data: [3532621.29, 5905478.5, 1573321.99, 5037318.39, 3691021.37, 3456996.64, 2441318.91, 0, 0, 0, 58878.15, 0].slice(0, mesAtual), backgroundColor: 'rgba(22, 163, 74, 0.6)' }] }, options: baseChartOptions });
+                new Chart(document.getElementById('bmPendenteChart'), { type: 'bar', data: { labels: chartLabels, datasets: [{ label: 'Itens', data: [9, 3, 4, 13, 14, 22, 22, 0, 0, 0, 0, 1].slice(0, mesAtual), backgroundColor: 'rgba(220, 38, 38, 0.6)' }] }, options: integerChartOptions });
+                new Chart(document.getElementById('relatoriosPendentesChart'), { type: 'bar', data: { labels: chartLabels, datasets: [{ label: 'Itens', data: [4, 3, 3, 1, 6, 3, 12, 0, 0, 0, 0, 0].slice(0, mesAtual), backgroundColor: 'rgba(249, 115, 22, 0.6)' }] }, options: integerChartOptions });
+            
+            } catch (error) {
+                console.error("ERRO ao desenhar os gráficos:", error);
+            }
+        });
+    </script>
+    
+
+    <script>
+        window.addEventListener('load', () => {
+            lucide.createIcons();
+            const mesAtual = parseInt('7', 10) || new Date().getMonth() + 1;
+            const elementosMes = document.querySelectorAll('.monthly-data p[data-month]');
+            elementosMes.forEach(el => {
+                const mesDoElemento = parseInt(el.getAttribute('data-month'), 10);
+                if (mesDoElemento > mesAtual) {
+                    el.style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
