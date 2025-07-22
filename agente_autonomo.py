@@ -13,15 +13,13 @@ load_dotenv()
 # --- 1. CONFIGURAÇÃO ---
 NOME_BANCO_DADOS = "gerenciamento.db"
 NOME_TEMPLATE_HTML = "dashboard_template.html"
-NOME_OUTPUT_HTML = "dashboard.html"
+NOME_OUTPUT_HTML = "index.html" # Mantendo como index.html para o GitHub Pages
 ANO_DE_ANALISE = 2025
-MES_ATUAL = 7
 MESES_MAP = {1: 'JAN', 2: 'FEV', 3: 'MAR', 4: 'ABR', 5: 'MAI', 6: 'JUN', 7: 'JUL', 8: 'AGO', 9: 'SET', 10: 'OUT', 11: 'NOV', 12: 'DEZ'}
 
-# --- 2. FERRAMENTAS DE CÁLCULO ---
-
+# --- Funções de cálculo (sem alterações) ---
 def executar_consulta(query: str) -> pd.DataFrame:
-    """Executa uma consulta e retorna um DataFrame do Pandas."""
+    # ... (código da função)
     print(f"-- Executando SQL: {query[:90]}...")
     conexao = sqlite3.connect(NOME_BANCO_DADOS)
     try:
@@ -34,7 +32,7 @@ def executar_consulta(query: str) -> pd.DataFrame:
     return df
 
 def get_dados_mensais(df: pd.DataFrame, coluna_data: str, tipo_agregacao: str = 'valor') -> dict:
-    """Helper para agrupar dados por mês, retornando um dicionário com 12 meses."""
+    # ... (código da função)
     if df.empty or coluna_data not in df.columns:
         return {mes_str: 0 for mes_str in MESES_MAP.values()}
     df[coluna_data] = pd.to_datetime(df[coluna_data], errors='coerce')
@@ -44,12 +42,12 @@ def get_dados_mensais(df: pd.DataFrame, coluna_data: str, tipo_agregacao: str = 
     df['mes'] = df[coluna_data].dt.month
     if tipo_agregacao == 'valor':
         dados_mensais = df.groupby('mes')["VALOR - VENDA (TOTAL) DESC."].sum()
-    else: # contagem
+    else:
         dados_mensais = df.groupby('mes').size()
     return {MESES_MAP[mes_num]: dados_mensais.get(mes_num, 0) for mes_num in range(1, 13)}
 
 def calcular_faturamento(ano: int, mes_limite: int) -> tuple[float, dict, float]:
-    """Calcula faturamento total do período, dados mensais e média."""
+    # ... (código da função)
     query = f"""
         SELECT "DATA (FATURAMENTO)", "VALOR - VENDA (TOTAL) DESC."
         FROM Vendas 
@@ -65,7 +63,7 @@ def calcular_faturamento(ano: int, mes_limite: int) -> tuple[float, dict, float]
     return total, mensal, media
 
 def calcular_vendas(ano: int, mes_limite: int) -> tuple[float, dict, float]:
-    """Calcula vendas totais, mensais e a média para um ano específico."""
+    # ... (código da função)
     query = f"""
         SELECT "DATA (RECEBIMENTO PO)", "VALOR - VENDA (TOTAL) DESC."
         FROM Vendas 
@@ -80,14 +78,12 @@ def calcular_vendas(ano: int, mes_limite: int) -> tuple[float, dict, float]:
     return total, mensal, media
 
 def calcular_pendentes(tipo: str, ano: int, mes_limite: int) -> tuple[int, float, dict]:
-    """Calcula BMs ou Relatórios pendentes para um ano e período específicos."""
+    # ... (código da função)
     if tipo == "bm":
         data_ref_pd, data_vazia_pd = 'DATA (ENVIO DOS RELATÓRIOS)', 'DATA (LIBERAÇÃO BM)'
-    else: # relatorios
+    else:
         data_ref_pd, data_vazia_pd = 'DATA (FINAL ATENDIMENTO)', 'DATA (ENVIO DOS RELATÓRIOS)'
-    
     data_ref_sql, data_vazia_sql = f'"{data_ref_pd}"', f'"{data_vazia_pd}"'
-    
     query = f"""
         SELECT "VALOR - VENDA (TOTAL) DESC.", {data_ref_sql}
         FROM Vendas
@@ -98,33 +94,30 @@ def calcular_pendentes(tipo: str, ano: int, mes_limite: int) -> tuple[int, float
     df = executar_consulta(query)
     df[data_ref_pd] = pd.to_datetime(df[data_ref_pd], errors='coerce')
     df_periodo = df[df[data_ref_pd].dt.month <= mes_limite]
-    
     qtde_total = len(df_periodo)
     valor_total = df_periodo["VALOR - VENDA (TOTAL) DESC."].sum()
     qtde_mensal = get_dados_mensais(df, data_ref_pd, 'contagem')
     return int(qtde_total), valor_total, qtde_mensal
 
-# --- 3. FASE 2: PREENCHIMENTO DO DASHBOARD ---
-
 def formatar_moeda(valor) -> str:
-    """Formata um número para o padrão de moeda brasileiro."""
+    # ... (código da função)
     if valor is None or not isinstance(valor, (int, float, np.number)): valor = 0.0
     valor_float = float(valor)
     return f"R$ {valor_float:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
 
 class NumpyEncoder(json.JSONEncoder):
+    # ... (código da função)
     def default(self, obj):
         if isinstance(obj, (np.integer, np.int64)): return int(obj)
         if isinstance(obj, (np.floating, np.float64)): return float(obj)
         return super(NumpyEncoder, self).default(obj)
 
 def gerar_script_graficos(dados: dict, mes_limite: int) -> str:
-    """Gera o bloco <script> completo para os gráficos."""
+    # ... (código da função)
     fat_mensal_lista = list(dados.get("FATURAMENTO_MENSAL", {}).values())
     ven_mensal_lista = list(dados.get("VENDAS_MENSAL", {}).values())
     bm_mensal_lista = list(dados.get("BM_PENDENTE_MENSAL", {}).values())
     rel_mensal_lista = list(dados.get("RELATORIOS_PENDENTES_MENSAL", {}).values())
-
     script = f"""
     <script>
         window.addEventListener('load', () => {{
@@ -132,7 +125,6 @@ def gerar_script_graficos(dados: dict, mes_limite: int) -> str:
                 const mesAtual = {mes_limite};
                 const todosOsMeses = ['JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN', 'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ'];
                 const chartLabels = todosOsMeses.slice(0, mesAtual);
-
                 const formatCurrency = (value) => (value || 0).toLocaleString('pt-BR', {{ style: 'currency', currency: 'BRL' }});
                 const formatInt = (value) => (value || 0).toLocaleString('pt-BR');
                 const formatAxisTick = (value, isCurrency = true) => {{
@@ -140,15 +132,12 @@ def gerar_script_graficos(dados: dict, mes_limite: int) -> str:
                     if (value >= 1000) return (isCurrency ? 'R$ ' : '') + (value / 1000).toFixed(0) + 'K';
                     return isCurrency ? formatCurrency(value) : formatInt(value);
                 }};
-
                 const baseChartOptions = {{ responsive: true, maintainAspectRatio: false, scales: {{ y: {{ beginAtZero: true, ticks: {{ callback: (val) => formatAxisTick(val, true) }} }}, x: {{ grid: {{ display: false }} }} }}, plugins: {{ legend: {{display: false}}, tooltip: {{ callbacks: {{ label: (c) => `${{c.dataset.label || ''}}: ${{formatCurrency(c.parsed.y)}}` }} }} }} }};
                 const integerChartOptions = {{ responsive: true, maintainAspectRatio: false, scales: {{ y: {{ beginAtZero: true, ticks: {{ precision: 0, callback: (val) => formatAxisTick(val, false) }} }}, x: {{ grid: {{ display: false }} }} }}, plugins: {{ legend: {{ display: false }}, tooltip: {{ callbacks: {{ label: (c) => `${{c.dataset.label || ''}}: ${{formatInt(c.parsed.y)}}` }} }} }} }};
-
                 new Chart(document.getElementById('faturamentoChart'), {{ type: 'bar', data: {{ labels: chartLabels, datasets: [{{ label: 'Faturamento', data: {json.dumps(fat_mensal_lista, cls=NumpyEncoder)}.slice(0, mesAtual), backgroundColor: 'rgba(79, 70, 229, 0.6)' }}] }}, options: baseChartOptions }});
                 new Chart(document.getElementById('vendasChart'), {{ type: 'bar', data: {{ labels: chartLabels, datasets: [{{ label: 'Vendas', data: {json.dumps(ven_mensal_lista, cls=NumpyEncoder)}.slice(0, mesAtual), backgroundColor: 'rgba(22, 163, 74, 0.6)' }}] }}, options: baseChartOptions }});
                 new Chart(document.getElementById('bmPendenteChart'), {{ type: 'bar', data: {{ labels: chartLabels, datasets: [{{ label: 'Itens', data: {json.dumps(bm_mensal_lista, cls=NumpyEncoder)}.slice(0, mesAtual), backgroundColor: 'rgba(220, 38, 38, 0.6)' }}] }}, options: integerChartOptions }});
                 new Chart(document.getElementById('relatoriosPendentesChart'), {{ type: 'bar', data: {{ labels: chartLabels, datasets: [{{ label: 'Itens', data: {json.dumps(rel_mensal_lista, cls=NumpyEncoder)}.slice(0, mesAtual), backgroundColor: 'rgba(249, 115, 22, 0.6)' }}] }}, options: integerChartOptions }});
-            
             }} catch (error) {{
                 console.error("ERRO ao desenhar os gráficos:", error);
             }}
@@ -157,14 +146,11 @@ def gerar_script_graficos(dados: dict, mes_limite: int) -> str:
     """
     return script
 
-def gerar_dashboard():
+def gerar_dashboard(ano_atual, mes_atual):
     """Função principal que orquestra o cálculo e a criação do HTML."""
-    agora = datetime.now()
-    ano_atual = ANO_DE_ANALISE
-    mes_atual = MES_ATUAL
-    
-    print(f"🤖 Agente Autônomo Final (v23) iniciado.")
-    print(f"Ano de Análise: {ano_atual}, Mês de Análise: {mes_atual}")
+    # --- EMOJI REMOVIDO DAQUI ---
+    print(f"Agente Autonomo Final (v23) iniciado.")
+    print(f"Ano de Analise: {ano_atual}, Mes de Analise: {mes_atual}")
     print("-" * 30)
     
     # Fase 1: Calcular tudo
@@ -189,8 +175,7 @@ def gerar_dashboard():
             "BM_PENDENTE_VALOR_TOTAL": formatar_moeda(bm_valor),
             "RELATORIOS_PENDENTES_QTDE_TOTAL": str(rel_qtde),
             "RELATORIOS_PENDENTES_VALOR_TOTAL": formatar_moeda(rel_valor),
-            # --- CORREÇÃO APLICADA AQUI ---
-            "DATA_ATUALIZACAO": agora.strftime("%d/%m/%Y %H:%M"),
+            "DATA_ATUALIZACAO": datetime.now().strftime("%d/%m/%Y"),
             "MES_ATUAL": str(mes_atual),
             "MES_ATUAL_NOME": MESES_MAP.get(mes_atual, '')
         }
@@ -226,7 +211,12 @@ def gerar_dashboard():
 
 # --- EXECUÇÃO PRINCIPAL ---
 if __name__ == "__main__":
-    gerar_dashboard()
+    agora = datetime.now()
+    ano_atual = agora.year
+    mes_atual = agora.month
+    
+    gerar_dashboard(ano_atual, mes_atual)
+    
     print("-" * 30)
-    print(f"✅ Processo Concluído!")
+    print("Processo Concluido!")
     print(f"Abra o arquivo '{NOME_OUTPUT_HTML}' para ver o resultado.")
