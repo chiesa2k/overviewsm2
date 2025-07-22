@@ -215,32 +215,7 @@ def gerar_dashboard():
             "MES_ATUAL": mes_atual
         }
         script_graficos = gerar_script_graficos(dados_graficos, mes_atual)
-        html_final = html_final.replace("
-    <script>
-        window.addEventListener('load', () => {
-            try {
-                const mesAtual = 7;
-                const todosOsMeses = ['JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN', 'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ'];
-                const chartLabels = todosOsMeses.slice(0, mesAtual);
-                const formatCurrency = (value) => (value || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-                const formatInt = (value) => (value || 0).toLocaleString('pt-BR');
-                const formatAxisTick = (value, isCurrency = true) => {
-                    if (value >= 1000000) return (isCurrency ? 'R$ ' : '') + (value / 1000000).toFixed(1) + 'M';
-                    if (value >= 1000) return (isCurrency ? 'R$ ' : '') + (value / 1000).toFixed(0) + 'K';
-                    return isCurrency ? formatCurrency(value) : formatInt(value);
-                };
-                const baseChartOptions = { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: { callback: (val) => formatAxisTick(val, true) } }, x: { grid: { display: false } } }, plugins: { legend: {display: false}, tooltip: { callbacks: { label: (c) => `${c.dataset.label || ''}: ${formatCurrency(c.parsed.y)}` } } } };
-                const integerChartOptions = { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: { precision: 0, callback: (val) => formatAxisTick(val, false) } }, x: { grid: { display: false } } }, plugins: { legend: { display: false }, tooltip: { callbacks: { label: (c) => `${c.dataset.label || ''}: ${formatInt(c.parsed.y)}` } } } };
-                new Chart(document.getElementById('faturamentoChart'), { type: 'bar', data: { labels: chartLabels, datasets: [{ label: 'Faturamento', data: [3051082.160001084, 4596221.51, 1919979.8375, 3982318.0695, 4073321.92, 5143314.38, 3647754.3000000003, 0, 0, 0, 0, 0].slice(0, mesAtual), backgroundColor: 'rgba(79, 70, 229, 0.6)' }] }, options: baseChartOptions });
-                new Chart(document.getElementById('vendasChart'), { type: 'bar', data: { labels: chartLabels, datasets: [{ label: 'Vendas', data: [3532621.29, 4655478.467, 1510801.99, 5037318.39, 3691021.37, 3456996.64, 2441318.91, 0, 0, 0, 58878.15, 0].slice(0, mesAtual), backgroundColor: 'rgba(22, 163, 74, 0.6)' }] }, options: baseChartOptions });
-                new Chart(document.getElementById('bmPendenteChart'), { type: 'bar', data: { labels: chartLabels, datasets: [{ label: 'Itens', data: [9, 3, 4, 13, 14, 22, 38, 0, 0, 0, 0, 1].slice(0, mesAtual), backgroundColor: 'rgba(220, 38, 38, 0.6)' }] }, options: integerChartOptions });
-                new Chart(document.getElementById('relatoriosPendentesChart'), { type: 'bar', data: { labels: chartLabels, datasets: [{ label: 'Itens', data: [4, 3, 3, 1, 7, 10, 14, 0, 0, 0, 0, 0].slice(0, mesAtual), backgroundColor: 'rgba(249, 115, 22, 0.6)' }] }, options: integerChartOptions });
-            } catch (error) {
-                console.error("ERRO ao desenhar os gráficos:", error);
-            }
-        });
-    </script>
-    ", script_graficos)
+        html_final = html_final.replace("{{GRAFICOS_SCRIPT}}", script_graficos)
 
         with open(NOME_OUTPUT_HTML, "w", encoding="utf-8") as f:
             f.write(html_final)

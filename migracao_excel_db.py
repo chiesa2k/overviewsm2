@@ -4,7 +4,7 @@ import os
 
 # --- CONFIGURAÇÃO ---
 NOME_BANCO_DADOS = "gerenciamento.db"
-NOME_ARQUIVO_EXCEL = "SM_Gerenciamento_19_20 (6).xlsx" 
+NOME_ARQUIVO_EXCEL = "SM_Gerenciamento_19_20 (6).xlsx"
 NOME_DA_ABA = "Gerenciamento"
 
 # --- FUNÇÃO DE LIMPEZA DE MOEDA ---
