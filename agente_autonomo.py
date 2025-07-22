@@ -19,6 +19,7 @@ MESES_MAP = {1: 'JAN', 2: 'FEV', 3: 'MAR', 4: 'ABR', 5: 'MAI', 6: 'JUN', 7: 'JUL
 
 # --- Funções de cálculo (sem alterações) ---
 def executar_consulta(query: str) -> pd.DataFrame:
+    # ... (código da função)
     print(f"-- Executando SQL: {query[:90]}...")
     conexao = sqlite3.connect(NOME_BANCO_DADOS)
     try:
@@ -31,6 +32,7 @@ def executar_consulta(query: str) -> pd.DataFrame:
     return df
 
 def get_dados_mensais(df: pd.DataFrame, coluna_data: str, tipo_agregacao: str = 'valor') -> dict:
+    # ... (código da função)
     if df.empty or coluna_data not in df.columns:
         return {mes_str: 0 for mes_str in MESES_MAP.values()}
     df[coluna_data] = pd.to_datetime(df[coluna_data], errors='coerce')
@@ -45,6 +47,7 @@ def get_dados_mensais(df: pd.DataFrame, coluna_data: str, tipo_agregacao: str = 
     return {MESES_MAP[mes_num]: dados_mensais.get(mes_num, 0) for mes_num in range(1, 13)}
 
 def calcular_faturamento(ano: int, mes_limite: int) -> tuple[float, dict, float]:
+    # ... (código da função)
     query = f"""
         SELECT "DATA (FATURAMENTO)", "VALOR - VENDA (TOTAL) DESC."
         FROM Vendas 
@@ -60,6 +63,7 @@ def calcular_faturamento(ano: int, mes_limite: int) -> tuple[float, dict, float]
     return total, mensal, media
 
 def calcular_vendas(ano: int, mes_limite: int) -> tuple[float, dict, float]:
+    # ... (código da função)
     query = f"""
         SELECT "DATA (RECEBIMENTO PO)", "VALOR - VENDA (TOTAL) DESC."
         FROM Vendas 
@@ -74,6 +78,7 @@ def calcular_vendas(ano: int, mes_limite: int) -> tuple[float, dict, float]:
     return total, mensal, media
 
 def calcular_pendentes(tipo: str, ano: int, mes_limite: int) -> tuple[int, float, dict]:
+    # ... (código da função)
     if tipo == "bm":
         data_ref_pd, data_vazia_pd = 'DATA (ENVIO DOS RELATÓRIOS)', 'DATA (LIBERAÇÃO BM)'
     else:
@@ -95,18 +100,54 @@ def calcular_pendentes(tipo: str, ano: int, mes_limite: int) -> tuple[int, float
     return int(qtde_total), valor_total, qtde_mensal
 
 def formatar_moeda(valor) -> str:
+    # ... (código da função)
     if valor is None or not isinstance(valor, (int, float, np.number)): valor = 0.0
     valor_float = float(valor)
     return f"R$ {valor_float:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
 
 class NumpyEncoder(json.JSONEncoder):
+    # ... (código da função)
     def default(self, obj):
         if isinstance(obj, (np.integer, np.int64)): return int(obj)
         if isinstance(obj, (np.floating, np.float64)): return float(obj)
         return super(NumpyEncoder, self).default(obj)
 
-# --- FASE 2: PREENCHIMENTO DO DASHBOARD ---
+def gerar_script_graficos(dados: dict, mes_limite: int) -> str:
+    # ... (código da função)
+    fat_mensal_lista = list(dados.get("FATURAMENTO_MENSAL", {}).values())
+    ven_mensal_lista = list(dados.get("VENDAS_MENSAL", {}).values())
+    bm_mensal_lista = list(dados.get("BM_PENDENTE_MENSAL", {}).values())
+    rel_mensal_lista = list(dados.get("RELATORIOS_PENDENTES_MENSAL", {}).values())
+    script = f"""
+    <script>
+        window.addEventListener('load', () => {{
+            try {{
+                const mesAtual = {mes_limite};
+                const todosOsMeses = ['JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN', 'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ'];
+                const chartLabels = todosOsMeses.slice(0, mesAtual);
+                const formatCurrency = (value) => (value || 0).toLocaleString('pt-BR', {{ style: 'currency', currency: 'BRL' }});
+                const formatInt = (value) => (value || 0).toLocaleString('pt-BR');
+                const formatAxisTick = (value, isCurrency = true) => {{
+                    if (value >= 1000000) return (isCurrency ? 'R$ ' : '') + (value / 1000000).toFixed(1) + 'M';
+                    if (value >= 1000) return (isCurrency ? 'R$ ' : '') + (value / 1000).toFixed(0) + 'K';
+                    return isCurrency ? formatCurrency(value) : formatInt(value);
+                }};
+                const baseChartOptions = {{ responsive: true, maintainAspectRatio: false, scales: {{ y: {{ beginAtZero: true, ticks: {{ callback: (val) => formatAxisTick(val, true) }} }}, x: {{ grid: {{ display: false }} }} }}, plugins: {{ legend: {{display: false}}, tooltip: {{ callbacks: {{ label: (c) => `${{c.dataset.label || ''}}: ${{formatCurrency(c.parsed.y)}}` }} }} }} }};
+                const integerChartOptions = {{ responsive: true, maintainAspectRatio: false, scales: {{ y: {{ beginAtZero: true, ticks: {{ precision: 0, callback: (val) => formatAxisTick(val, false) }} }}, x: {{ grid: {{ display: false }} }} }}, plugins: {{ legend: {{ display: false }}, tooltip: {{ callbacks: {{ label: (c) => `${{c.dataset.label || ''}}: ${{formatInt(c.parsed.y)}}` }} }} }} }};
+                new Chart(document.getElementById('faturamentoChart'), {{ type: 'bar', data: {{ labels: chartLabels, datasets: [{{ label: 'Faturamento', data: {json.dumps(fat_mensal_lista, cls=NumpyEncoder)}.slice(0, mesAtual), backgroundColor: 'rgba(79, 70, 229, 0.6)' }}] }}, options: baseChartOptions }});
+                new Chart(document.getElementById('vendasChart'), {{ type: 'bar', data: {{ labels: chartLabels, datasets: [{{ label: 'Vendas', data: {json.dumps(ven_mensal_lista, cls=NumpyEncoder)}.slice(0, mesAtual), backgroundColor: 'rgba(22, 163, 74, 0.6)' }}] }}, options: baseChartOptions }});
+                new Chart(document.getElementById('bmPendenteChart'), {{ type: 'bar', data: {{ labels: chartLabels, datasets: [{{ label: 'Itens', data: {json.dumps(bm_mensal_lista, cls=NumpyEncoder)}.slice(0, mesAtual), backgroundColor: 'rgba(220, 38, 38, 0.6)' }}] }}, options: integerChartOptions }});
+                new Chart(document.getElementById('relatoriosPendentesChart'), {{ type: 'bar', data: {{ labels: chartLabels, datasets: [{{ label: 'Itens', data: {json.dumps(rel_mensal_lista, cls=NumpyEncoder)}.slice(0, mesAtual), backgroundColor: 'rgba(249, 115, 22, 0.6)' }}] }}, options: integerChartOptions }});
+            }} catch (error) {{
+                console.error("ERRO ao desenhar os gráficos:", error);
+            }}
+        }});
+    </script>
+    """
+    return script
+
 def gerar_dashboard(ano_atual, mes_atual):
+    """Função principal que orquestra o cálculo e a criação do HTML."""
     # --- EMOJI REMOVIDO DAQUI ---
     print(f"Agente Autonomo Final (v23) iniciado.")
     print(f"Ano de Analise: {ano_atual}, Mes de Analise: {mes_atual}")
@@ -124,9 +165,43 @@ def gerar_dashboard(ano_atual, mes_atual):
     try:
         with open(NOME_TEMPLATE_HTML, 'r', encoding='utf-8') as f:
             html_final = f.read()
-
-        # ... (restante do código de substituição)
         
+        dados_para_substituir = {
+            "FATURAMENTO_TOTAL": formatar_moeda(fat_total),
+            "FATURAMENTO_MEDIA": formatar_moeda(fat_media),
+            "VENDAS_TOTAL": formatar_moeda(ven_total),
+            "VENDAS_MEDIA": formatar_moeda(ven_media),
+            "BM_PENDENTE_QTDE_TOTAL": str(bm_qtde),
+            "BM_PENDENTE_VALOR_TOTAL": formatar_moeda(bm_valor),
+            "RELATORIOS_PENDENTES_QTDE_TOTAL": str(rel_qtde),
+            "RELATORIOS_PENDENTES_VALOR_TOTAL": formatar_moeda(rel_valor),
+            "DATA_ATUALIZACAO": datetime.now().strftime("%d/%m/%Y"),
+            "MES_ATUAL": str(mes_atual),
+            "MES_ATUAL_NOME": MESES_MAP.get(mes_atual, '')
+        }
+
+        for mes_str, val_mes in fat_mensal.items():
+            dados_para_substituir[f"FATURAMENTO_MENSAL_{mes_str}"] = formatar_moeda(val_mes)
+        for mes_str, val_mes in ven_mensal.items():
+            dados_para_substituir[f"VENDAS_MENSAL_{mes_str}"] = formatar_moeda(val_mes)
+        for mes_str, qtde_mes in bm_mensal.items():
+            dados_para_substituir[f"BM_PENDENTE_MENSAL_{mes_str}"] = f"{int(qtde_mes)} itens"
+        for mes_str, qtde_mes in rel_mensal.items():
+            dados_para_substituir[f"RELATORIOS_PENDENTES_MENSAL_{mes_str}"] = f"{int(qtde_mes)} itens"
+
+        for marcador, valor_final in dados_para_substituir.items():
+            html_final = html_final.replace(f"{{{{{marcador}}}}}", valor_final)
+        
+        dados_graficos = {
+            "FATURAMENTO_MENSAL": fat_mensal, 
+            "VENDAS_MENSAL": ven_mensal, 
+            "BM_PENDENTE_MENSAL": bm_mensal,
+            "RELATORIOS_PENDENTES_MENSAL": rel_mensal,
+            "MES_ATUAL": mes_atual
+        }
+        script_graficos = gerar_script_graficos(dados_graficos, mes_atual)
+        html_final = html_final.replace("{{GRAFICOS_SCRIPT}}", script_graficos)
+
         with open(NOME_OUTPUT_HTML, "w", encoding="utf-8") as f:
             f.write(html_final)
         

@@ -34,14 +34,14 @@
         <img src="https://i.postimg.cc/ydCgL04c/e4d3aeb7-dbb0-4a0a-b249-7859f2985440.png" alt="Logo da Empresa" class="h-10 md:h-12" onerror="this.style.display='none'">
         <div>
             <h1 class="text-2xl md:text-3xl font-bold text-gray-800">Dashboard de Resultados Operacionais</h1>
-            <p class="text-gray-600">Resumo dos indicadores para {{ANO_DE_ANALISE}} (até {{MES_ATUAL_NOME}})</p>
+            <p class="text-gray-600">Resumo dos indicadores para {{ANO_DE_ANALISE}} (até JUL)</p>
         </div>
     </header>
 
     <main class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-6">
         <section class="data-card">
             <h2 class="card-title"><i data-lucide="dollar-sign" style="color: #4f46e5;"></i>Faturamento</h2>
-            <div class="total-value" id="faturamento-total" style="color: #16a34a;">{{FATURAMENTO_TOTAL}}</div>
+            <div class="total-value" id="faturamento-total" style="color: #16a34a;">R$ 26.413.992,18</div>
             <div class="chart-container"><canvas id="faturamentoChart"></canvas></div>
             <div class="monthly-data" id="faturamento-mensal">
                 {{LISTA_FATURAMENTO}}
@@ -49,7 +49,7 @@
         </section>
         <section class="data-card">
             <h2 class="card-title"><i data-lucide="shopping-cart" style="color: #16a34a;"></i>Vendas</h2>
-            <div class="total-value" id="vendas-total" style="color: #16a34a;">{{VENDAS_TOTAL}}</div>
+            <div class="total-value" id="vendas-total" style="color: #16a34a;">R$ 24.325.557,06</div>
             <div class="chart-container"><canvas id="vendasChart"></canvas></div>
             <div class="monthly-data" id="vendas-mensal">
                 {{LISTA_VENDAS}}
@@ -58,7 +58,7 @@
         <section class="data-card">
             <h2 class="card-title"><i data-lucide="alert-circle" style="color: #dc2626;"></i>BM Pendente</h2>
             <p class="card-subtitle-custom">Quantidade de Itens ({{ANO_DE_ANALISE}})</p>
-            <div class="card-main-metric">{{BM_PENDENTE_QTDE_TOTAL}}</div>
+            <div class="card-main-metric">103</div>
             <div class="chart-container"><canvas id="bmPendenteChart"></canvas></div>
             <div class="monthly-data" id="bm-pendente-mensal">
                 {{LISTA_BM_PENDENTE}}
@@ -67,7 +67,7 @@
         <section class="data-card">
             <h2 class="card-title"><i data-lucide="file-warning" style="color: #f97316;"></i>Relatórios Pendentes</h2>
             <p class="card-subtitle-custom">Quantidade de Itens ({{ANO_DE_ANALISE}})</p>
-            <div class="card-main-metric">{{RELATORIOS_PENDENTES_QTDE_TOTAL}}</div>
+            <div class="card-main-metric">42</div>
             <div class="chart-container"><canvas id="relatoriosPendentesChart"></canvas></div>
             <div class="monthly-data" id="relatorios-pendentes-mensal">
                 {{LISTA_RELATORIOS_PENDENTES}}
@@ -76,10 +76,35 @@
     </main>
 
     <footer class="mt-6 text-center text-sm text-gray-500"> 
-        Atualizado em: {{DATA_ATUALIZACAO}}
+        Atualizado em: 22/07/2025
     </footer>
 
-    {{GRAFICOS_SCRIPT}}
+    
+    <script>
+        window.addEventListener('load', () => {
+            try {
+                const mesAtual = 7;
+                const todosOsMeses = ['JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN', 'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ'];
+                const chartLabels = todosOsMeses.slice(0, mesAtual);
+                const formatCurrency = (value) => (value || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                const formatInt = (value) => (value || 0).toLocaleString('pt-BR');
+                const formatAxisTick = (value, isCurrency = true) => {
+                    if (value >= 1000000) return (isCurrency ? 'R$ ' : '') + (value / 1000000).toFixed(1) + 'M';
+                    if (value >= 1000) return (isCurrency ? 'R$ ' : '') + (value / 1000).toFixed(0) + 'K';
+                    return isCurrency ? formatCurrency(value) : formatInt(value);
+                };
+                const baseChartOptions = { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: { callback: (val) => formatAxisTick(val, true) } }, x: { grid: { display: false } } }, plugins: { legend: {display: false}, tooltip: { callbacks: { label: (c) => `${c.dataset.label || ''}: ${formatCurrency(c.parsed.y)}` } } } };
+                const integerChartOptions = { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: { precision: 0, callback: (val) => formatAxisTick(val, false) } }, x: { grid: { display: false } } }, plugins: { legend: { display: false }, tooltip: { callbacks: { label: (c) => `${c.dataset.label || ''}: ${formatInt(c.parsed.y)}` } } } };
+                new Chart(document.getElementById('faturamentoChart'), { type: 'bar', data: { labels: chartLabels, datasets: [{ label: 'Faturamento', data: [3051082.160001084, 4596221.51, 1919979.8375, 3982318.0695, 4073321.92, 5143314.38, 3647754.3000000003, 0, 0, 0, 0, 0].slice(0, mesAtual), backgroundColor: 'rgba(79, 70, 229, 0.6)' }] }, options: baseChartOptions });
+                new Chart(document.getElementById('vendasChart'), { type: 'bar', data: { labels: chartLabels, datasets: [{ label: 'Vendas', data: [3532621.29, 4655478.467, 1510801.99, 5037318.39, 3691021.37, 3456996.64, 2441318.91, 0, 0, 0, 58878.15, 0].slice(0, mesAtual), backgroundColor: 'rgba(22, 163, 74, 0.6)' }] }, options: baseChartOptions });
+                new Chart(document.getElementById('bmPendenteChart'), { type: 'bar', data: { labels: chartLabels, datasets: [{ label: 'Itens', data: [9, 3, 4, 13, 14, 22, 38, 0, 0, 0, 0, 1].slice(0, mesAtual), backgroundColor: 'rgba(220, 38, 38, 0.6)' }] }, options: integerChartOptions });
+                new Chart(document.getElementById('relatoriosPendentesChart'), { type: 'bar', data: { labels: chartLabels, datasets: [{ label: 'Itens', data: [4, 3, 3, 1, 7, 10, 14, 0, 0, 0, 0, 0].slice(0, mesAtual), backgroundColor: 'rgba(249, 115, 22, 0.6)' }] }, options: integerChartOptions });
+            } catch (error) {
+                console.error("ERRO ao desenhar os gráficos:", error);
+            }
+        });
+    </script>
+    
     
 </body>
 </html>
