@@ -79,7 +79,6 @@ def calcular_vendas(ano: int, mes_limite: int) -> tuple[float, dict, float]:
     media = total / mes_limite if mes_limite > 0 else 0
     return total, mensal, media
 
-# --- FUNÇÃO DE PENDÊNCIAS CORRIGIDA ---
 def calcular_pendentes(tipo: str, ano: int, mes_limite: int) -> tuple[int, float, dict]:
     """Calcula BMs ou Relatórios pendentes para um ano e período específicos."""
     if tipo == "bm":
@@ -190,7 +189,8 @@ def gerar_dashboard():
             "BM_PENDENTE_VALOR_TOTAL": formatar_moeda(bm_valor),
             "RELATORIOS_PENDENTES_QTDE_TOTAL": str(rel_qtde),
             "RELATORIOS_PENDENTES_VALOR_TOTAL": formatar_moeda(rel_valor),
-            "DATA_ATUALIZACAO": agora.strftime("%d/%m/%Y"),
+            # --- CORREÇÃO APLICADA AQUI ---
+            "DATA_ATUALIZACAO": agora.strftime("%d/%m/%Y %H:%M"),
             "MES_ATUAL": str(mes_atual),
             "MES_ATUAL_NOME": MESES_MAP.get(mes_atual, '')
         }
