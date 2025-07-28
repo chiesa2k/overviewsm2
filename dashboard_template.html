@@ -41,45 +41,107 @@
     <main class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-6">
         <section class="data-card">
             <h2 class="card-title"><i data-lucide="dollar-sign" style="color: #4f46e5;"></i>Faturamento</h2>
-            <div class="total-value" id="faturamento-total" style="color: #16a34a;">{{FATURAMENTO_TOTAL}}</div>
+            <div class="total-value" style="color: #16a34a;">{{FATURAMENTO_TOTAL}}</div>
             <div class="chart-container"><canvas id="faturamentoChart"></canvas></div>
-            <div class="monthly-data" id="faturamento-mensal">
-                {{LISTA_FATURAMENTO}}
+            <div class="monthly-data">
+                <p data-month="1">JAN: <span>{{FATURAMENTO_MENSAL_JAN}}</span></p>
+                <p data-month="2">FEV: <span>{{FATURAMENTO_MENSAL_FEV}}</span></p>
+                <p data-month="3">MAR: <span>{{FATURAMENTO_MENSAL_MAR}}</span></p>
+                <p data-month="4">ABR: <span>{{FATURAMENTO_MENSAL_ABR}}</span></p>
+                <p data-month="5">MAI: <span>{{FATURAMENTO_MENSAL_MAI}}</span></p>
+                <p data-month="6">JUN: <span>{{FATURAMENTO_MENSAL_JUN}}</span></p>
+                <p data-month="7">JUL: <span>{{FATURAMENTO_MENSAL_JUL}}</span></p>
+                <p data-month="8">AGO: <span>{{FATURAMENTO_MENSAL_AGO}}</span></p>
+                <p data-month="9">SET: <span>{{FATURAMENTO_MENSAL_SET}}</span></p>
+                <p data-month="10">OUT: <span>{{FATURAMENTO_MENSAL_OUT}}</span></p>
+                <p data-month="11">NOV: <span>{{FATURAMENTO_MENSAL_NOV}}</span></p>
+                <p data-month="12">DEZ: <span>{{FATURAMENTO_MENSAL_DEZ}}</span></p>
+                <p class="summary-line">Média Mensal: <span class="font-semibold">{{FATURAMENTO_MEDIA}}</span></p>
             </div>
         </section>
         <section class="data-card">
             <h2 class="card-title"><i data-lucide="shopping-cart" style="color: #16a34a;"></i>Vendas</h2>
-            <div class="total-value" id="vendas-total" style="color: #16a34a;">{{VENDAS_TOTAL}}</div>
+            <div class="total-value" style="color: #16a34a;">{{VENDAS_TOTAL}}</div>
             <div class="chart-container"><canvas id="vendasChart"></canvas></div>
-            <div class="monthly-data" id="vendas-mensal">
-                {{LISTA_VENDAS}}
+            <div class="monthly-data">
+                <p data-month="1">JAN: <span>{{VENDAS_MENSAL_JAN}}</span></p>
+                <p data-month="2">FEV: <span>{{VENDAS_MENSAL_FEV}}</span></p>
+                <p data-month="3">MAR: <span>{{VENDAS_MENSAL_MAR}}</span></p>
+                <p data-month="4">ABR: <span>{{VENDAS_MENSAL_ABR}}</span></p>
+                <p data-month="5">MAI: <span>{{VENDAS_MENSAL_MAI}}</span></p>
+                <p data-month="6">JUN: <span>{{VENDAS_MENSAL_JUN}}</span></p>
+                <p data-month="7">JUL: <span>{{VENDAS_MENSAL_JUL}}</span></p>
+                <p data-month="8">AGO: <span>{{VENDAS_MENSAL_AGO}}</span></p>
+                <p data-month="9">SET: <span>{{VENDAS_MENSAL_SET}}</span></p>
+                <p data-month="10">OUT: <span>{{VENDAS_MENSAL_OUT}}</span></p>
+                <p data-month="11">NOV: <span>{{VENDAS_MENSAL_NOV}}</span></p>
+                <p data-month="12">DEZ: <span>{{VENDAS_MENSAL_DEZ}}</span></p>
+                <p class="summary-line">Média Mensal: <span class="font-semibold">{{VENDAS_MEDIA}}</span></p>
             </div>
         </section>
         <section class="data-card">
             <h2 class="card-title"><i data-lucide="alert-circle" style="color: #dc2626;"></i>BM Pendente</h2>
-            <p class="card-subtitle-custom">Quantidade de Itens ({{ANO_DE_ANALISE}})</p>
+            <p class="card-subtitle-custom">Quantidade de Itens (2025)</p>
             <div class="card-main-metric">{{BM_PENDENTE_QTDE_TOTAL}}</div>
             <div class="chart-container"><canvas id="bmPendenteChart"></canvas></div>
-            <div class="monthly-data" id="bm-pendente-mensal">
-                {{LISTA_BM_PENDENTE}}
+            <div class="monthly-data">
+                <p data-month="1">JAN: <span>{{BM_PENDENTE_MENSAL_JAN}}</span></p>
+                <p data-month="2">FEV: <span>{{BM_PENDENTE_MENSAL_FEV}}</span></p>
+                <p data-month="3">MAR: <span>{{BM_PENDENTE_MENSAL_MAR}}</span></p>
+                <p data-month="4">ABR: <span>{{BM_PENDENTE_MENSAL_ABR}}</span></p>
+                <p data-month="5">MAI: <span>{{BM_PENDENTE_MENSAL_MAI}}</span></p>
+                <p data-month="6">JUN: <span>{{BM_PENDENTE_MENSAL_JUN}}</span></p>
+                <p data-month="7">JUL: <span>{{BM_PENDENTE_MENSAL_JUL}}</span></p>
+                <p data-month="8">AGO: <span>{{BM_PENDENTE_MENSAL_AGO}}</span></p>
+                <p data-month="9">SET: <span>{{BM_PENDENTE_MENSAL_SET}}</span></p>
+                <p data-month="10">OUT: <span>{{BM_PENDENTE_MENSAL_OUT}}</span></p>
+                <p data-month="11">NOV: <span>{{BM_PENDENTE_MENSAL_NOV}}</span></p>
+                <p data-month="12">DEZ: <span>{{BM_PENDENTE_MENSAL_DEZ}}</span></p>
+                <p class="summary-line">Valor Total (Período): <span class="font-semibold pending-value">{{BM_PENDENTE_VALOR_TOTAL}}</span></p>
             </div>
         </section>
         <section class="data-card">
             <h2 class="card-title"><i data-lucide="file-warning" style="color: #f97316;"></i>Relatórios Pendentes</h2>
-            <p class="card-subtitle-custom">Quantidade de Itens ({{ANO_DE_ANALISE}})</p>
+            <p class="card-subtitle-custom">Quantidade de Itens (2025)</p>
             <div class="card-main-metric">{{RELATORIOS_PENDENTES_QTDE_TOTAL}}</div>
             <div class="chart-container"><canvas id="relatoriosPendentesChart"></canvas></div>
-            <div class="monthly-data" id="relatorios-pendentes-mensal">
-                {{LISTA_RELATORIOS_PENDENTES}}
+            <div class="monthly-data">
+                <p data-month="1">JAN: <span>{{RELATORIOS_PENDENTES_MENSAL_JAN}}</span></p>
+                <p data-month="2">FEV: <span>{{RELATORIOS_PENDENTES_MENSAL_FEV}}</span></p>
+                <p data-month="3">MAR: <span>{{RELATORIOS_PENDENTES_MENSAL_MAR}}</span></p>
+                <p data-month="4">ABR: <span>{{RELATORIOS_PENDENTES_MENSAL_ABR}}</span></p>
+                <p data-month="5">MAI: <span>{{RELATORIOS_PENDENTES_MENSAL_MAI}}</span></p>
+                <p data-month="6">JUN: <span>{{RELATORIOS_PENDENTES_MENSAL_JUN}}</span></p>
+                <p data-month="7">JUL: <span>{{RELATORIOS_PENDENTES_MENSAL_JUL}}</span></p>
+                <p data-month="8">AGO: <span>{{RELATORIOS_PENDENTES_MENSAL_AGO}}</span></p>
+                <p data-month="9">SET: <span>{{RELATORIOS_PENDENTES_MENSAL_SET}}</span></p>
+                <p data-month="10">OUT: <span>{{RELATORIOS_PENDENTES_MENSAL_OUT}}</span></p>
+                <p data-month="11">NOV: <span>{{RELATORIOS_PENDENTES_MENSAL_NOV}}</span></p>
+                <p data-month="12">DEZ: <span>{{RELATORIOS_PENDENTES_MENSAL_DEZ}}</span></p>
+                <p class="summary-line">Valor Total (Período): <span class="font-semibold pending-value">{{RELATORIOS_PENDENTES_VALOR_TOTAL}}</span></p>
             </div>
         </section>
     </main>
 
     <footer class="mt-6 text-center text-sm text-gray-500"> 
-        Atualizado em: {{DATA_ATUALIZACAO}}
+        Última atualização: {{DATA_ATUALIZACAO}}. 
     </footer>
 
+    <!-- O SCRIPT DOS GRÁFICOS E LÓGICA DE VISUALIZAÇÃO ENTRAM AQUI -->
     {{GRAFICOS_SCRIPT}}
-    
+
+    <script>
+        window.addEventListener('load', () => {
+            lucide.createIcons();
+            const mesAtual = parseInt('{{MES_ATUAL}}', 10) || new Date().getMonth() + 1;
+            const elementosMes = document.querySelectorAll('.monthly-data p[data-month]');
+            elementosMes.forEach(el => {
+                const mesDoElemento = parseInt(el.getAttribute('data-month'), 10);
+                if (mesDoElemento > mesAtual) {
+                    el.style.display = 'none';
+                }
+            });
+        });
+    </script>
 </body>
 </html>
