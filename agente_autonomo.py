@@ -7,14 +7,17 @@ from datetime import datetime
 import json
 import numpy as np
 
+# Carrega as variáveis de ambiente
 load_dotenv()
 
+# --- 1. CONFIGURAÇÃO ---
 NOME_BANCO_DADOS = "gerenciamento.db"
 NOME_TEMPLATE_HTML = "dashboard_template.html"
-NOME_OUTPUT_HTML = "index.html"
+NOME_OUTPUT_HTML = "index.html" # Mantendo como index.html para o GitHub Pages
 ANO_DE_ANALISE = 2025
 MESES_MAP = {1: 'JAN', 2: 'FEV', 3: 'MAR', 4: 'ABR', 5: 'MAI', 6: 'JUN', 7: 'JUL', 8: 'AGO', 9: 'SET', 10: 'OUT', 11: 'NOV', 12: 'DEZ'}
 
+# --- Funções de cálculo (sem alterações) ---
 def executar_consulta(query: str) -> pd.DataFrame:
     print(f"-- Executando SQL: {query[:90]}...")
     conexao = sqlite3.connect(NOME_BANCO_DADOS)
@@ -102,24 +105,28 @@ class NumpyEncoder(json.JSONEncoder):
         if isinstance(obj, (np.floating, np.float64)): return float(obj)
         return super(NumpyEncoder, self).default(obj)
 
+# --- FASE 2: PREENCHIMENTO DO DASHBOARD ---
 def gerar_dashboard(ano_atual, mes_atual):
-    print(f"Agente Autonomo Final iniciado.")
+    # --- EMOJI REMOVIDO DAQUI ---
+    print(f"Agente Autonomo Final (v23) iniciado.")
     print(f"Ano de Analise: {ano_atual}, Mes de Analise: {mes_atual}")
     print("-" * 30)
     
+    # Fase 1: Calcular tudo
     print("Passo 1: Calculando indicadores...")
     fat_total, fat_mensal, fat_media = calcular_faturamento(ano_atual, mes_atual)
     ven_total, ven_mensal, ven_media = calcular_vendas(ano_atual, mes_atual)
     bm_qtde, bm_valor, bm_mensal = calcular_pendentes("bm", ano_atual, mes_atual)
     rel_qtde, rel_valor, rel_mensal = calcular_pendentes("relatorio", ano_atual, mes_atual)
     
+    # Fase 2: Atualizar o HTML
     print("\nPasso 2: Atualizando o arquivo do dashboard...")
     try:
         with open(NOME_TEMPLATE_HTML, 'r', encoding='utf-8') as f:
             html_final = f.read()
 
-        # ... (código de substituição omitido por brevidade)
-
+        # ... (restante do código de substituição)
+        
         with open(NOME_OUTPUT_HTML, "w", encoding="utf-8") as f:
             f.write(html_final)
         
@@ -127,8 +134,14 @@ def gerar_dashboard(ano_atual, mes_atual):
     except Exception as e:
         print(f"ERRO ao escrever no dashboard: {e}")
 
+# --- EXECUÇÃO PRINCIPAL ---
 if __name__ == "__main__":
     agora = datetime.now()
     ano_atual = agora.year
     mes_atual = agora.month
+    
     gerar_dashboard(ano_atual, mes_atual)
+    
+    print("-" * 30)
+    print("Processo Concluido!")
+    print(f"Abra o arquivo '{NOME_OUTPUT_HTML}' para ver o resultado.")
