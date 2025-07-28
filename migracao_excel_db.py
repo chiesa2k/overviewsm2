@@ -56,7 +56,6 @@ def migrar_dados():
         df.to_sql("Vendas", conexao, index=False, if_exists='replace')
         print(f"-> Sucesso! Tabela 'Vendas' criada com {len(df)} linhas.")
 
-        # --- EMOJI REMOVIDO DAQUI ---
         print("\nMigracao final (lendo do Excel) concluida!")
 
     except Exception as e:
