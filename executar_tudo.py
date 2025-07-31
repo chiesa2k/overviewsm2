@@ -11,16 +11,31 @@ def executar_comando(comando):
     """Executa um comando no terminal e mostra a saída em tempo real."""
     print(f"\n> Executando: {comando}")
     try:
+        # --- CORREÇÃO APLICADA AQUI ---
+        # Cria uma cópia do ambiente atual e adiciona a variável para forçar UTF-8
+        env = os.environ.copy()
+        env['PYTHONUTF8'] = "1"
+        
         processo = subprocess.Popen(
-            comando, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, 
-            text=True, encoding='utf-8', errors='replace', cwd=CAMINHO_PROJETO
+            comando, 
+            shell=True, 
+            stdout=subprocess.PIPE, 
+            stderr=subprocess.STDOUT, 
+            text=True, 
+            cwd=CAMINHO_PROJETO,
+            env=env # Usa o ambiente modificado
         )
+        
+        # Lê e imprime a saída do processo em tempo real
         while True:
             output = processo.stdout.readline()
             if output == '' and processo.poll() is not None:
                 break
             if output:
+                # Usa o encoding do sistema para imprimir, com fallback para utf-8
                 print(output.strip())
+        
+        # Verifica se houve erro
         if processo.returncode != 0:
             print(f"ERRO: O comando falhou com o codigo de saida {processo.returncode}")
             return False
