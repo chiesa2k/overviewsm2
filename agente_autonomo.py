@@ -2,7 +2,7 @@ import os
 import sqlite3
 import pandas as pd
 from dotenv import load_dotenv
-from typing import Dict, List, Tuple
+from typing import TypedDict, Dict, List, Tuple
 from datetime import datetime
 import json
 import numpy as np
@@ -14,6 +14,8 @@ load_dotenv()
 NOME_BANCO_DADOS = "gerenciamento.db"
 NOME_TEMPLATE_HTML = "dashboard_template.html"
 NOME_OUTPUT_HTML = "index.html" # Nome final para o GitHub Pages
+ANO_DE_ANALISE = 2025
+MES_ATUAL = 8 # <<< ALTERAÇÃO APLICADA AQUI
 MESES_MAP = {1: 'JAN', 2: 'FEV', 3: 'MAR', 4: 'ABR', 5: 'MAI', 6: 'JUN', 7: 'JUL', 8: 'AGO', 9: 'SET', 10: 'OUT', 11: 'NOV', 12: 'DEZ'}
 
 # --- 2. FERRAMENTAS DE CÁLCULO ---
@@ -157,6 +159,8 @@ def gerar_script_graficos(dados: dict, mes_limite: int) -> str:
 
 def gerar_dashboard(ano_atual, mes_atual):
     """Função principal que orquestra o cálculo e a criação do HTML."""
+    agora = datetime.now()
+    
     print(f"Agente Autonomo Final iniciado.")
     print(f"Ano de Analise: {ano_atual}, Mes de Analise: {mes_atual}")
     print("-" * 30)
@@ -183,7 +187,7 @@ def gerar_dashboard(ano_atual, mes_atual):
             "BM_PENDENTE_VALOR_TOTAL": formatar_moeda(bm_valor),
             "RELATORIOS_PENDENTES_QTDE_TOTAL": str(rel_qtde),
             "RELATORIOS_PENDENTES_VALOR_TOTAL": formatar_moeda(rel_valor),
-            "DATA_ATUALIZACAO": datetime.now().strftime("%d/%m/%Y %H:%M"),
+            "DATA_ATUALIZACAO": agora.strftime("%d/%m/%Y %H:%M"),
             "MES_ATUAL": str(mes_atual),
             "MES_ATUAL_NOME": MESES_MAP.get(mes_atual, ''),
             "ANO_DE_ANALISE": str(ano_atual)
@@ -228,4 +232,3 @@ if __name__ == "__main__":
     print("-" * 30)
     print("Processo Concluido!")
     print(f"Abra o arquivo '{NOME_OUTPUT_HTML}' para ver o resultado.")
-
