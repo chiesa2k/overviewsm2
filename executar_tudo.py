@@ -1,43 +1,40 @@
 import os
+import shutil
 import subprocess
 from datetime import datetime
-import sys
 
 # --- CONFIGURAÇÃO ---
-SCRIPT_MIGRACAO = "migracao_excel_db.py"
-SCRIPT_AGENTE = "agente_autonomo.py"
-CAMINHO_PROJETO = r"C:\Users\andrey.chiesa\OneDrive - SUPPLY MARINE SERVICOS LTDA\Área de Trabalho\analista_dados"
+# Onde seus arquivos originais estão (na sua pasta do OneDrive)
+PASTA_ORIGEM = r"C:\Users\andrey.chiesa\OneDrive - SUPPLY MARINE SERVICOS LTDA\Área de Trabalho\analista_dados"
 
-def executar_comando(comando):
-    """Executa um comando no terminal e mostra a saída em tempo real."""
-    print(f"\n> Executando: {comando}")
+# A nova "oficina" do nosso robô, fora do OneDrive
+PASTA_TRABALHO = r"C:\automacao_dashboard"
+URL_REPOSITORIO_GIT = "https://github.com/chiesa2k/overviewsm2.git"
+
+# Nomes dos arquivos essenciais para o processo
+ARQUIVOS_NECESSARIOS = [
+    "migracao_excel_db.py",
+    "agente_autonomo.py",
+    "dashboard_template.html",
+    "SM_Gerenciamento_19_20 (6).xlsx",
+    ".env",
+    ".gitignore"
+]
+
+def executar_comando(comando, pasta_execucao):
+    """Executa um comando no terminal dentro da pasta de trabalho especificada."""
+    print(f"\n> Executando em '{pasta_execucao}': {comando}")
     try:
-        # --- CORREÇÃO APLICADA AQUI ---
-        # Cria uma cópia do ambiente atual e adiciona a variável para forçar UTF-8
-        env = os.environ.copy()
-        env['PYTHONUTF8'] = "1"
-        
         processo = subprocess.Popen(
-            comando, 
-            shell=True, 
-            stdout=subprocess.PIPE, 
-            stderr=subprocess.STDOUT, 
-            text=True, 
-            encoding='utf-8',
-            errors='replace',
-            cwd=CAMINHO_PROJETO,
-            env=env # Usa o ambiente modificado
+            comando, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, 
+            text=True, encoding='utf-8', errors='replace', cwd=pasta_execucao
         )
-        
-        # Lê e imprime a saída do processo em tempo real
         while True:
             output = processo.stdout.readline()
             if output == '' and processo.poll() is not None:
                 break
             if output:
                 print(output.strip())
-        
-        # Verifica se houve erro
         if processo.returncode != 0:
             print(f"ERRO: O comando falhou com o codigo de saida {processo.returncode}")
             return False
@@ -46,23 +43,48 @@ def executar_comando(comando):
         print(f"ERRO inesperado ao executar o comando: {e}")
         return False
 
+def preparar_ambiente():
+    """Garante que a pasta de trabalho existe, é um repositório Git e tem os arquivos mais recentes."""
+    print("\n[ETAPA 1 de 4] Preparando o ambiente de automacao...")
+    
+    # 1. Verifica se a pasta de trabalho existe
+    if not os.path.exists(PASTA_TRABALHO):
+        print(f"Pasta de trabalho nao encontrada. Clonando o repositorio para '{PASTA_TRABALHO}'...")
+        if not executar_comando(f'git clone {URL_REPOSITORIO_GIT} "{PASTA_TRABALHO}"', None):
+            return False
+    
+    # 2. Copia os arquivos mais recentes
+    print(f"- Copiando arquivos essenciais para a pasta de trabalho...")
+    for nome_arquivo in ARQUIVOS_NECESSARIOS:
+        origem = os.path.join(PASTA_ORIGEM, nome_arquivo)
+        destino = os.path.join(PASTA_TRABALHO, nome_arquivo)
+        if os.path.exists(origem):
+            shutil.copy2(origem, destino)
+        else:
+            print(f"AVISO: Arquivo '{nome_arquivo}' nao encontrado na origem.")
+            
+    return True
+
 def processo_completo():
     """Orquestra a execução completa do processo de BI."""
     print("INICIANDO PROCESSO DE ATUALIZACAO COMPLETA DO DASHBOARD")
     print("="*60)
 
-    print("\n[ETAPA 1 de 3] Migrando dados do Excel para o Banco de Dados...")
-    if not executar_comando(f"python {SCRIPT_MIGRACAO}"):
+    if not preparar_ambiente():
         return
 
-    print("\n[ETAPA 2 de 3] Gerando o dashboard com os dados atualizados...")
-    if not executar_comando(f"python {SCRIPT_AGENTE}"):
+    print("\n[ETAPA 2 de 4] Migrando dados do Excel para o Banco de Dados...")
+    if not executar_comando(f"python migracao_excel_db.py", PASTA_TRABALHO):
         return
 
-    print("\n[ETAPA 3 de 3] Publicando a nova versao no GitHub...")
+    print("\n[ETAPA 3 de 4] Gerando o dashboard com os dados atualizados...")
+    if not executar_comando(f"python agente_autonomo.py", PASTA_TRABALHO):
+        return
+
+    print("\n[ETAPA 4 de 4] Publicando a nova versao no GitHub...")
     commit_message = f"Atualizacao automatica do dashboard - {datetime.now().strftime('%d/%m/%Y %H:%M')}"
     comandos_git = f'git add . && git commit -m "{commit_message}" && git push'
-    if not executar_comando(comandos_git):
+    if not executar_comando(comandos_git, PASTA_TRABALHO):
         return
 
     print("="*60)
