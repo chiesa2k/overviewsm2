@@ -115,7 +115,7 @@
                 <p data-month="7">JUL: <span>4 itens</span></p>
                 <p data-month="8">AGO: <span>9 itens</span></p>
                 <p data-month="9">SET: <span>0 itens</span></p>
-                <p data-month="10">OUT: <span>0 itens</span></p>
+                <p data-month="10">OUT: <span>1 itens</span></p>
                 <p data-month="11">NOV: <span>0 itens</span></p>
                 <p data-month="12">DEZ: <span>0 itens</span></p>
                 <p class="summary-line">Valor Total (Período): <span class="font-semibold pending-value">R$ 1.121.282,25</span></p>
@@ -124,7 +124,7 @@
     </main>
 
     <footer class="mt-6 text-center text-sm text-gray-500"> 
-        Atualizado em: 29/08/2025 09:00. 
+        Atualizado em: 29/08/2025 10:01. 
     </footer>
 
     <!-- O SCRIPT DOS GRÁFICOS E LÓGICA DE VISUALIZAÇÃO ENTRAM AQUI -->
@@ -150,7 +150,7 @@
                 new Chart(document.getElementById('faturamentoChart'), { type: 'bar', data: { labels: chartLabels, datasets: [{ label: 'Faturamento', data: [3051082.160001084, 4596221.51, 1919979.8375, 3989318.0695, 4113922.92, 5149914.38, 3874394.985, 3680598.99, 0, 0, 0, 0].slice(0, mesAtual), backgroundColor: 'rgba(79, 70, 229, 0.6)' }] }, options: baseChartOptions });
                 new Chart(document.getElementById('vendasChart'), { type: 'bar', data: { labels: chartLabels, datasets: [{ label: 'Vendas', data: [3625747.54, 4916956.457, 1602649.99, 5163189.39, 3702842.07, 3573486.005, 3910465.58, 3779010.33, 0, 0, 58878.15, 0].slice(0, mesAtual), backgroundColor: 'rgba(22, 163, 74, 0.6)' }] }, options: baseChartOptions });
                 new Chart(document.getElementById('bmPendenteChart'), { type: 'bar', data: { labels: chartLabels, datasets: [{ label: 'Itens', data: [8, 3, 4, 11, 12, 14, 8, 46, 2, 0, 0, 1].slice(0, mesAtual), backgroundColor: 'rgba(220, 38, 38, 0.6)' }] }, options: integerChartOptions });
-                new Chart(document.getElementById('relatoriosPendentesChart'), { type: 'bar', data: { labels: chartLabels, datasets: [{ label: 'Itens', data: [4, 3, 4, 2, 6, 3, 4, 9, 0, 0, 0, 0].slice(0, mesAtual), backgroundColor: 'rgba(249, 115, 22, 0.6)' }] }, options: integerChartOptions });
+                new Chart(document.getElementById('relatoriosPendentesChart'), { type: 'bar', data: { labels: chartLabels, datasets: [{ label: 'Itens', data: [4, 3, 4, 2, 6, 3, 4, 9, 0, 1, 0, 0].slice(0, mesAtual), backgroundColor: 'rgba(249, 115, 22, 0.6)' }] }, options: integerChartOptions });
             
             } catch (error) {
                 console.error("ERRO ao desenhar os gráficos:", error);
