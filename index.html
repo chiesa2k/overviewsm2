@@ -82,7 +82,7 @@
         <section class="data-card">
             <h2 class="card-title"><i data-lucide="alert-circle" style="color: #dc2626;"></i>BM Pendente</h2>
             <p class="card-subtitle-custom">Quantidade de Itens (2025)</p>
-            <div class="card-main-metric">110</div>
+            <div class="card-main-metric">108</div>
             <div class="chart-container"><canvas id="bmPendenteChart"></canvas></div>
             <div class="monthly-data">
                 <p data-month="1">JAN: <span>8 itens</span></p>
@@ -90,14 +90,14 @@
                 <p data-month="3">MAR: <span>3 itens</span></p>
                 <p data-month="4">ABR: <span>11 itens</span></p>
                 <p data-month="5">MAI: <span>10 itens</span></p>
-                <p data-month="6">JUN: <span>13 itens</span></p>
+                <p data-month="6">JUN: <span>12 itens</span></p>
                 <p data-month="7">JUL: <span>7 itens</span></p>
-                <p data-month="8">AGO: <span>41 itens</span></p>
+                <p data-month="8">AGO: <span>40 itens</span></p>
                 <p data-month="9">SET: <span>14 itens</span></p>
                 <p data-month="10">OUT: <span>0 itens</span></p>
                 <p data-month="11">NOV: <span>0 itens</span></p>
                 <p data-month="12">DEZ: <span>1 itens</span></p>
-                <p class="summary-line">Valor Total (Período): <span class="font-semibold pending-value">R$ 4.385.909,05</span></p>
+                <p class="summary-line">Valor Total (Período): <span class="font-semibold pending-value">R$ 4.209.993,05</span></p>
             </div>
         </section>
         <section class="data-card">
@@ -124,7 +124,7 @@
     </main>
 
     <footer class="mt-6 text-center text-sm text-gray-500"> 
-        Atualizado em: 02/09/2025 16:01. 
+        Atualizado em: 02/09/2025 17:01. 
     </footer>
 
     <!-- O SCRIPT DOS GRÁFICOS E LÓGICA DE VISUALIZAÇÃO ENTRAM AQUI -->
@@ -149,7 +149,7 @@
 
                 new Chart(document.getElementById('faturamentoChart'), { type: 'bar', data: { labels: chartLabels, datasets: [{ label: 'Faturamento', data: [3051082.160001084, 4596221.51, 1919979.8375, 3989318.0695, 4113922.92, 5149914.38, 3874394.985, 3765393.99, 551961.785, 0, 0, 0].slice(0, mesAtual), backgroundColor: 'rgba(79, 70, 229, 0.6)' }] }, options: baseChartOptions });
                 new Chart(document.getElementById('vendasChart'), { type: 'bar', data: { labels: chartLabels, datasets: [{ label: 'Vendas', data: [3625747.54, 5041956.447, 1598869.99, 5163189.39, 3702842.07, 3573486.005, 3950145.58, 3848474.33, 106694.0, 0, 58878.15, 0].slice(0, mesAtual), backgroundColor: 'rgba(22, 163, 74, 0.6)' }] }, options: baseChartOptions });
-                new Chart(document.getElementById('bmPendenteChart'), { type: 'bar', data: { labels: chartLabels, datasets: [{ label: 'Itens', data: [8, 3, 3, 11, 10, 13, 7, 41, 14, 0, 0, 1].slice(0, mesAtual), backgroundColor: 'rgba(220, 38, 38, 0.6)' }] }, options: integerChartOptions });
+                new Chart(document.getElementById('bmPendenteChart'), { type: 'bar', data: { labels: chartLabels, datasets: [{ label: 'Itens', data: [8, 3, 3, 11, 10, 12, 7, 40, 14, 0, 0, 1].slice(0, mesAtual), backgroundColor: 'rgba(220, 38, 38, 0.6)' }] }, options: integerChartOptions });
                 new Chart(document.getElementById('relatoriosPendentesChart'), { type: 'bar', data: { labels: chartLabels, datasets: [{ label: 'Itens', data: [4, 3, 4, 2, 6, 3, 5, 15, 2, 0, 0, 0].slice(0, mesAtual), backgroundColor: 'rgba(249, 115, 22, 0.6)' }] }, options: integerChartOptions });
             
             } catch (error) {
