@@ -82,7 +82,7 @@
         <section class="data-card">
             <h2 class="card-title"><i data-lucide="alert-circle" style="color: #dc2626;"></i>BM Pendente</h2>
             <p class="card-subtitle-custom">Quantidade de Itens (2025)</p>
-            <div class="card-main-metric">108</div>
+            <div class="card-main-metric">107</div>
             <div class="chart-container"><canvas id="bmPendenteChart"></canvas></div>
             <div class="monthly-data">
                 <p data-month="1">JAN: <span>8 itens</span></p>
@@ -92,18 +92,18 @@
                 <p data-month="5">MAI: <span>10 itens</span></p>
                 <p data-month="6">JUN: <span>13 itens</span></p>
                 <p data-month="7">JUL: <span>7 itens</span></p>
-                <p data-month="8">AGO: <span>43 itens</span></p>
+                <p data-month="8">AGO: <span>42 itens</span></p>
                 <p data-month="9">SET: <span>10 itens</span></p>
                 <p data-month="10">OUT: <span>0 itens</span></p>
                 <p data-month="11">NOV: <span>0 itens</span></p>
                 <p data-month="12">DEZ: <span>1 itens</span></p>
-                <p class="summary-line">Valor Total (Período): <span class="font-semibold pending-value">R$ 4.301.241,86</span></p>
+                <p class="summary-line">Valor Total (Período): <span class="font-semibold pending-value">R$ 4.186.241,86</span></p>
             </div>
         </section>
         <section class="data-card">
             <h2 class="card-title"><i data-lucide="file-warning" style="color: #f97316;"></i>Relatórios Pendentes</h2>
             <p class="card-subtitle-custom">Quantidade de Itens (2025)</p>
-            <div class="card-main-metric">43</div>
+            <div class="card-main-metric">48</div>
             <div class="chart-container"><canvas id="relatoriosPendentesChart"></canvas></div>
             <div class="monthly-data">
                 <p data-month="1">JAN: <span>4 itens</span></p>
@@ -112,19 +112,19 @@
                 <p data-month="4">ABR: <span>2 itens</span></p>
                 <p data-month="5">MAI: <span>6 itens</span></p>
                 <p data-month="6">JUN: <span>3 itens</span></p>
-                <p data-month="7">JUL: <span>4 itens</span></p>
-                <p data-month="8">AGO: <span>16 itens</span></p>
-                <p data-month="9">SET: <span>1 itens</span></p>
+                <p data-month="7">JUL: <span>5 itens</span></p>
+                <p data-month="8">AGO: <span>19 itens</span></p>
+                <p data-month="9">SET: <span>2 itens</span></p>
                 <p data-month="10">OUT: <span>0 itens</span></p>
                 <p data-month="11">NOV: <span>0 itens</span></p>
                 <p data-month="12">DEZ: <span>0 itens</span></p>
-                <p class="summary-line">Valor Total (Período): <span class="font-semibold pending-value">R$ 1.561.711,25</span></p>
+                <p class="summary-line">Valor Total (Período): <span class="font-semibold pending-value">R$ 1.633.245,25</span></p>
             </div>
         </section>
     </main>
 
     <footer class="mt-6 text-center text-sm text-gray-500"> 
-        Atualizado em: 02/09/2025 09:02. 
+        Atualizado em: 02/09/2025 10:01. 
     </footer>
 
     <!-- O SCRIPT DOS GRÁFICOS E LÓGICA DE VISUALIZAÇÃO ENTRAM AQUI -->
@@ -149,8 +149,8 @@
 
                 new Chart(document.getElementById('faturamentoChart'), { type: 'bar', data: { labels: chartLabels, datasets: [{ label: 'Faturamento', data: [3051082.160001084, 4596221.51, 1919979.8375, 3989318.0695, 4113922.92, 5149914.38, 3874394.985, 3765393.99, 343123.125, 0, 0, 0].slice(0, mesAtual), backgroundColor: 'rgba(79, 70, 229, 0.6)' }] }, options: baseChartOptions });
                 new Chart(document.getElementById('vendasChart'), { type: 'bar', data: { labels: chartLabels, datasets: [{ label: 'Vendas', data: [3625747.54, 5041956.447, 1598869.99, 5163189.39, 3702842.07, 3573486.005, 3939357.58, 3835774.33, 97952.0, 0, 58878.15, 0].slice(0, mesAtual), backgroundColor: 'rgba(22, 163, 74, 0.6)' }] }, options: baseChartOptions });
-                new Chart(document.getElementById('bmPendenteChart'), { type: 'bar', data: { labels: chartLabels, datasets: [{ label: 'Itens', data: [8, 3, 3, 11, 10, 13, 7, 43, 10, 0, 0, 1].slice(0, mesAtual), backgroundColor: 'rgba(220, 38, 38, 0.6)' }] }, options: integerChartOptions });
-                new Chart(document.getElementById('relatoriosPendentesChart'), { type: 'bar', data: { labels: chartLabels, datasets: [{ label: 'Itens', data: [4, 3, 4, 2, 6, 3, 4, 16, 1, 0, 0, 0].slice(0, mesAtual), backgroundColor: 'rgba(249, 115, 22, 0.6)' }] }, options: integerChartOptions });
+                new Chart(document.getElementById('bmPendenteChart'), { type: 'bar', data: { labels: chartLabels, datasets: [{ label: 'Itens', data: [8, 3, 3, 11, 10, 13, 7, 42, 10, 0, 0, 1].slice(0, mesAtual), backgroundColor: 'rgba(220, 38, 38, 0.6)' }] }, options: integerChartOptions });
+                new Chart(document.getElementById('relatoriosPendentesChart'), { type: 'bar', data: { labels: chartLabels, datasets: [{ label: 'Itens', data: [4, 3, 4, 2, 6, 3, 5, 19, 2, 0, 0, 0].slice(0, mesAtual), backgroundColor: 'rgba(249, 115, 22, 0.6)' }] }, options: integerChartOptions });
             
             } catch (error) {
                 console.error("ERRO ao desenhar os gráficos:", error);
