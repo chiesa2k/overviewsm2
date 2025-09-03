@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard de Resultados Operacionais</title>
+    <title>Dashboard de Resultados e Previsão</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio,line-clamp,container-queries"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -26,6 +26,8 @@
         .monthly-data .summary-line { color: #374151; font-size: 0.9rem; margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px dashed #d1d5db; }
         .card-subtitle-custom { color: #4b5563; margin-bottom: 0.25rem; font-size: 0.875rem; }
         .card-main-metric { font-size: 1.8rem; font-weight: 700; color: #1f2937; }
+        .var-positive { color: #16a34a; }
+        .var-negative { color: #dc2626; }
     </style>
 </head>
 <body class="p-6 md:p-10">
@@ -33,12 +35,13 @@
     <header class="mb-8 flex items-center space-x-4">
         <img src="https://i.postimg.cc/ydCgL04c/e4d3aeb7-dbb0-4a0a-b249-7859f2985440.png" alt="Logo da Empresa" class="h-10 md:h-12" onerror="this.style.display='none'">
         <div>
-            <h1 class="text-2xl md:text-3xl font-bold text-gray-800">Dashboard de Resultados Operacionais</h1>
+            <h1 class="text-2xl md:text-3xl font-bold text-gray-800">Dashboard de Resultados e Previsão</h1>
             <p class="text-gray-600">Resumo dos indicadores para {{ANO_DE_ANALISE}} (até {{MES_ATUAL_NOME}})</p>
         </div>
     </header>
 
-    <main class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-6">
+    <main class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        
         <section class="data-card">
             <h2 class="card-title"><i data-lucide="dollar-sign" style="color: #4f46e5;"></i>Faturamento</h2>
             <div class="total-value" style="color: #16a34a;">{{FATURAMENTO_TOTAL}}</div>
@@ -57,8 +60,15 @@
                 <p data-month="11">NOV: <span>{{FATURAMENTO_MENSAL_NOV}}</span></p>
                 <p data-month="12">DEZ: <span>{{FATURAMENTO_MENSAL_DEZ}}</span></p>
                 <p class="summary-line">Média Mensal: <span class="font-semibold">{{FATURAMENTO_MEDIA}}</span></p>
+                
+                <!-- --- SEÇÃO DE COMPARAÇÃO ATUALIZADA --- -->
+                <div class="border-t border-dashed border-gray-200 mt-3 pt-3 text-sm">
+                    <p class="flex justify-between text-gray-600">2024 (mesmo período): <span class="font-medium text-gray-700">{{FATURAMENTO_TOTAL_2024}}</span></p>
+                    <p class="flex justify-between text-gray-600 mt-1">Variação Ano a Ano: <span class="font-bold {{FATURAMENTO_VARIACAO_CLASSE}}">{{FATURAMENTO_VARIACAO}}</span></p>
+                </div>
             </div>
         </section>
+
         <section class="data-card">
             <h2 class="card-title"><i data-lucide="shopping-cart" style="color: #16a34a;"></i>Vendas</h2>
             <div class="total-value" style="color: #16a34a;">{{VENDAS_TOTAL}}</div>
@@ -79,13 +89,14 @@
                 <p class="summary-line">Média Mensal: <span class="font-semibold">{{VENDAS_MEDIA}}</span></p>
             </div>
         </section>
+        
         <section class="data-card">
             <h2 class="card-title"><i data-lucide="alert-circle" style="color: #dc2626;"></i>BM Pendente</h2>
-            <p class="card-subtitle-custom">Quantidade de Itens (2025)</p>
+            <p class="card-subtitle-custom">Quantidade de Itens ({{ANO_DE_ANALISE}})</p>
             <div class="card-main-metric">{{BM_PENDENTE_QTDE_TOTAL}}</div>
             <div class="chart-container"><canvas id="bmPendenteChart"></canvas></div>
             <div class="monthly-data">
-                <p data-month="1">JAN: <span>{{BM_PENDENTE_MENSAL_JAN}}</span></p>
+                 <p data-month="1">JAN: <span>{{BM_PENDENTE_MENSAL_JAN}}</span></p>
                 <p data-month="2">FEV: <span>{{BM_PENDENTE_MENSAL_FEV}}</span></p>
                 <p data-month="3">MAR: <span>{{BM_PENDENTE_MENSAL_MAR}}</span></p>
                 <p data-month="4">ABR: <span>{{BM_PENDENTE_MENSAL_ABR}}</span></p>
@@ -100,9 +111,10 @@
                 <p class="summary-line">Valor Total (Período): <span class="font-semibold pending-value">{{BM_PENDENTE_VALOR_TOTAL}}</span></p>
             </div>
         </section>
+
         <section class="data-card">
             <h2 class="card-title"><i data-lucide="file-warning" style="color: #f97316;"></i>Relatórios Pendentes</h2>
-            <p class="card-subtitle-custom">Quantidade de Itens (2025)</p>
+            <p class="card-subtitle-custom">Quantidade de Itens ({{ANO_DE_ANALISE}})</p>
             <div class="card-main-metric">{{RELATORIOS_PENDENTES_QTDE_TOTAL}}</div>
             <div class="chart-container"><canvas id="relatoriosPendentesChart"></canvas></div>
             <div class="monthly-data">
@@ -121,27 +133,30 @@
                 <p class="summary-line">Valor Total (Período): <span class="font-semibold pending-value">{{RELATORIOS_PENDENTES_VALOR_TOTAL}}</span></p>
             </div>
         </section>
+
     </main>
 
     <footer class="mt-6 text-center text-sm text-gray-500"> 
         Atualizado em: {{DATA_ATUALIZACAO}}. 
     </footer>
 
-    <!-- O SCRIPT DOS GRÁFICOS E LÓGICA DE VISUALIZAÇÃO ENTRAM AQUI -->
     {{GRAFICOS_SCRIPT}}
 
     <script>
         window.addEventListener('load', () => {
-            lucide.createIcons();
-            const mesAtual = parseInt('{{MES_ATUAL}}', 10) || new Date().getMonth() + 1;
-            const elementosMes = document.querySelectorAll('.monthly-data p[data-month]');
-            elementosMes.forEach(el => {
-                const mesDoElemento = parseInt(el.getAttribute('data-month'), 10);
-                if (mesDoElemento > mesAtual) {
-                    el.style.display = 'none';
-                }
-            });
+            try {
+                lucide.createIcons();
+                const mesAtual = parseInt('{{MES_ATUAL}}', 10) || new Date().getMonth() + 1;
+                document.querySelectorAll('.monthly-data p[data-month]').forEach(el => {
+                    if (parseInt(el.getAttribute('data-month'), 10) > mesAtual) {
+                        el.style.display = 'none';
+                    }
+                });
+            } catch (error) {
+                console.error("Erro ao ajustar meses:", error);
+            }
         });
     </script>
 </body>
 </html>
+

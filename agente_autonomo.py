@@ -2,7 +2,7 @@ import os
 import sqlite3
 import pandas as pd
 from dotenv import load_dotenv
-from typing import TypedDict, Dict, List, Tuple
+from typing import Dict, List, Tuple
 from datetime import datetime
 import json
 import numpy as np
@@ -14,8 +14,6 @@ load_dotenv()
 NOME_BANCO_DADOS = "gerenciamento.db"
 NOME_TEMPLATE_HTML = "dashboard_template.html"
 NOME_OUTPUT_HTML = "index.html" # Nome final para o GitHub Pages
-ANO_DE_ANALISE = 2025
-MES_ATUAL = 8 # <<< ALTERAÇÃO APLICADA AQUI
 MESES_MAP = {1: 'JAN', 2: 'FEV', 3: 'MAR', 4: 'ABR', 5: 'MAI', 6: 'JUN', 7: 'JUL', 8: 'AGO', 9: 'SET', 10: 'OUT', 11: 'NOV', 12: 'DEZ'}
 
 # --- 2. FERRAMENTAS DE CÁLCULO ---
@@ -121,6 +119,7 @@ class NumpyEncoder(json.JSONEncoder):
 def gerar_script_graficos(dados: dict, mes_limite: int) -> str:
     """Gera o bloco <script> completo para os gráficos."""
     fat_mensal_lista = list(dados.get("FATURAMENTO_MENSAL", {}).values())
+    fat_mensal_2024_lista = list(dados.get("FATURAMENTO_MENSAL_2024", {}).values()) # DADO PARA O NOVO GRÁFICO
     ven_mensal_lista = list(dados.get("VENDAS_MENSAL", {}).values())
     bm_mensal_lista = list(dados.get("BM_PENDENTE_MENSAL", {}).values())
     rel_mensal_lista = list(dados.get("RELATORIOS_PENDENTES_MENSAL", {}).values())
@@ -141,11 +140,36 @@ def gerar_script_graficos(dados: dict, mes_limite: int) -> str:
                     return isCurrency ? formatCurrency(value) : formatInt(value);
                 }};
 
-                const baseChartOptions = {{ responsive: true, maintainAspectRatio: false, scales: {{ y: {{ beginAtZero: true, ticks: {{ callback: (val) => formatAxisTick(val, true) }} }}, x: {{ grid: {{ display: false }} }} }}, plugins: {{ legend: {{display: false}}, tooltip: {{ callbacks: {{ label: (c) => `${{c.dataset.label || ''}}: ${{formatCurrency(c.parsed.y)}}` }} }} }} }};
+                const baseChartOptions = {{ responsive: true, maintainAspectRatio: false, scales: {{ y: {{ beginAtZero: true, ticks: {{ callback: (val) => formatAxisTick(val, true) }} }}, x: {{ grid: {{ display: false }} }} }}, plugins: {{ legend: {{display: true}}, tooltip: {{ callbacks: {{ label: (c) => `${{c.dataset.label || ''}}: ${{formatCurrency(c.parsed.y)}}` }} }} }} }};
                 const integerChartOptions = {{ responsive: true, maintainAspectRatio: false, scales: {{ y: {{ beginAtZero: true, ticks: {{ precision: 0, callback: (val) => formatAxisTick(val, false) }} }}, x: {{ grid: {{ display: false }} }} }}, plugins: {{ legend: {{ display: false }}, tooltip: {{ callbacks: {{ label: (c) => `${{c.dataset.label || ''}}: ${{formatInt(c.parsed.y)}}` }} }} }} }};
 
-                new Chart(document.getElementById('faturamentoChart'), {{ type: 'bar', data: {{ labels: chartLabels, datasets: [{{ label: 'Faturamento', data: {json.dumps(fat_mensal_lista, cls=NumpyEncoder)}.slice(0, mesAtual), backgroundColor: 'rgba(79, 70, 229, 0.6)' }}] }}, options: baseChartOptions }});
-                new Chart(document.getElementById('vendasChart'), {{ type: 'bar', data: {{ labels: chartLabels, datasets: [{{ label: 'Vendas', data: {json.dumps(ven_mensal_lista, cls=NumpyEncoder)}.slice(0, mesAtual), backgroundColor: 'rgba(22, 163, 74, 0.6)' }}] }}, options: baseChartOptions }});
+                // --- GRÁFICO DE FATURAMENTO ATUALIZADO (MISTO) ---
+                new Chart(document.getElementById('faturamentoChart'), {{
+                    type: 'bar',
+                    data: {{
+                        labels: chartLabels,
+                        datasets: [
+                            {{
+                                label: 'Faturamento 2025',
+                                type: 'bar',
+                                data: {json.dumps(fat_mensal_lista, cls=NumpyEncoder)}.slice(0, mesAtual),
+                                backgroundColor: 'rgba(79, 70, 229, 0.6)'
+                            }},
+                            {{
+                                label: 'Faturamento 2024',
+                                type: 'line',
+                                data: {json.dumps(fat_mensal_2024_lista, cls=NumpyEncoder)}.slice(0, mesAtual),
+                                borderColor: 'rgba(220, 38, 38, 0.8)',
+                                backgroundColor: 'rgba(220, 38, 38, 0.1)',
+                                tension: 0.1,
+                                fill: false
+                            }}
+                        ]
+                    }},
+                    options: baseChartOptions
+                }});
+
+                new Chart(document.getElementById('vendasChart'), {{ type: 'bar', data: {{ labels: chartLabels, datasets: [{{ label: 'Vendas', data: {json.dumps(ven_mensal_lista, cls=NumpyEncoder)}.slice(0, mesAtual), backgroundColor: 'rgba(22, 163, 74, 0.6)' }}] }}, options: {{...baseChartOptions, plugins: {{...baseChartOptions.plugins, legend:{{display:false}} }} }} }});
                 new Chart(document.getElementById('bmPendenteChart'), {{ type: 'bar', data: {{ labels: chartLabels, datasets: [{{ label: 'Itens', data: {json.dumps(bm_mensal_lista, cls=NumpyEncoder)}.slice(0, mesAtual), backgroundColor: 'rgba(220, 38, 38, 0.6)' }}] }}, options: integerChartOptions }});
                 new Chart(document.getElementById('relatoriosPendentesChart'), {{ type: 'bar', data: {{ labels: chartLabels, datasets: [{{ label: 'Itens', data: {json.dumps(rel_mensal_lista, cls=NumpyEncoder)}.slice(0, mesAtual), backgroundColor: 'rgba(249, 115, 22, 0.6)' }}] }}, options: integerChartOptions }});
             
@@ -171,6 +195,10 @@ def gerar_dashboard(ano_atual, mes_atual):
     ven_total, ven_mensal, ven_media = calcular_vendas(ano_atual, mes_atual)
     bm_qtde, bm_valor, bm_mensal = calcular_pendentes("bm", ano_atual, mes_atual)
     rel_qtde, rel_valor, rel_mensal = calcular_pendentes("relatorio", ano_atual, mes_atual)
+    fat_total_2024, fat_mensal_2024, _ = calcular_faturamento(ano_atual - 1, mes_atual)
+
+    variacao_faturamento = ((fat_total - fat_total_2024) / fat_total_2024 * 100) if fat_total_2024 > 0 else 0
+    variacao_classe = "var-positive" if variacao_faturamento >= 0 else "var-negative"
     
     # Fase 2: Atualizar o HTML
     print("\nPasso 2: Atualizando o arquivo do dashboard...")
@@ -190,7 +218,10 @@ def gerar_dashboard(ano_atual, mes_atual):
             "DATA_ATUALIZACAO": agora.strftime("%d/%m/%Y %H:%M"),
             "MES_ATUAL": str(mes_atual),
             "MES_ATUAL_NOME": MESES_MAP.get(mes_atual, ''),
-            "ANO_DE_ANALISE": str(ano_atual)
+            "ANO_DE_ANALISE": str(ano_atual),
+            "FATURAMENTO_TOTAL_2024": formatar_moeda(fat_total_2024),
+            "FATURAMENTO_VARIACAO": f"{variacao_faturamento:+.2f}%".replace('.',','),
+            "FATURAMENTO_VARIACAO_CLASSE": variacao_classe
         }
 
         for mes_str, val_mes in fat_mensal.items():
@@ -207,10 +238,10 @@ def gerar_dashboard(ano_atual, mes_atual):
         
         dados_graficos = {
             "FATURAMENTO_MENSAL": fat_mensal, 
+            "FATURAMENTO_MENSAL_2024": fat_mensal_2024,
             "VENDAS_MENSAL": ven_mensal, 
             "BM_PENDENTE_MENSAL": bm_mensal,
             "RELATORIOS_PENDENTES_MENSAL": rel_mensal,
-            "MES_ATUAL": mes_atual
         }
         script_graficos = gerar_script_graficos(dados_graficos, mes_atual)
         html_final = html_final.replace("{{GRAFICOS_SCRIPT}}", script_graficos)
@@ -232,3 +263,4 @@ if __name__ == "__main__":
     print("-" * 30)
     print("Processo Concluido!")
     print(f"Abra o arquivo '{NOME_OUTPUT_HTML}' para ver o resultado.")
+

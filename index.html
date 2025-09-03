@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard de Resultados Operacionais</title>
+    <title>Dashboard de Resultados e Previsão</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio,line-clamp,container-queries"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -26,6 +26,8 @@
         .monthly-data .summary-line { color: #374151; font-size: 0.9rem; margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px dashed #d1d5db; }
         .card-subtitle-custom { color: #4b5563; margin-bottom: 0.25rem; font-size: 0.875rem; }
         .card-main-metric { font-size: 1.8rem; font-weight: 700; color: #1f2937; }
+        .var-positive { color: #16a34a; }
+        .var-negative { color: #dc2626; }
     </style>
 </head>
 <body class="p-6 md:p-10">
@@ -33,12 +35,13 @@
     <header class="mb-8 flex items-center space-x-4">
         <img src="https://i.postimg.cc/ydCgL04c/e4d3aeb7-dbb0-4a0a-b249-7859f2985440.png" alt="Logo da Empresa" class="h-10 md:h-12" onerror="this.style.display='none'">
         <div>
-            <h1 class="text-2xl md:text-3xl font-bold text-gray-800">Dashboard de Resultados Operacionais</h1>
+            <h1 class="text-2xl md:text-3xl font-bold text-gray-800">Dashboard de Resultados e Previsão</h1>
             <p class="text-gray-600">Resumo dos indicadores para 2025 (até SET)</p>
         </div>
     </header>
 
-    <main class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-6">
+    <main class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        
         <section class="data-card">
             <h2 class="card-title"><i data-lucide="dollar-sign" style="color: #4f46e5;"></i>Faturamento</h2>
             <div class="total-value" style="color: #16a34a;">R$ 31.260.789,64</div>
@@ -57,8 +60,15 @@
                 <p data-month="11">NOV: <span>R$ 0,00</span></p>
                 <p data-month="12">DEZ: <span>R$ 0,00</span></p>
                 <p class="summary-line">Média Mensal: <span class="font-semibold">R$ 3.473.421,07</span></p>
+                
+                <!-- --- SEÇÃO DE COMPARAÇÃO ATUALIZADA --- -->
+                <div class="border-t border-dashed border-gray-200 mt-3 pt-3 text-sm">
+                    <p class="flex justify-between text-gray-600">2024 (mesmo período): <span class="font-medium text-gray-700">R$ 28.453.245,75</span></p>
+                    <p class="flex justify-between text-gray-600 mt-1">Variação Ano a Ano: <span class="font-bold var-positive">+9,87%</span></p>
+                </div>
             </div>
         </section>
+
         <section class="data-card">
             <h2 class="card-title"><i data-lucide="shopping-cart" style="color: #16a34a;"></i>Vendas</h2>
             <div class="total-value" style="color: #16a34a;">R$ 30.659.704,10</div>
@@ -79,13 +89,14 @@
                 <p class="summary-line">Média Mensal: <span class="font-semibold">R$ 3.406.633,79</span></p>
             </div>
         </section>
+        
         <section class="data-card">
             <h2 class="card-title"><i data-lucide="alert-circle" style="color: #dc2626;"></i>BM Pendente</h2>
             <p class="card-subtitle-custom">Quantidade de Itens (2025)</p>
             <div class="card-main-metric">106</div>
             <div class="chart-container"><canvas id="bmPendenteChart"></canvas></div>
             <div class="monthly-data">
-                <p data-month="1">JAN: <span>8 itens</span></p>
+                 <p data-month="1">JAN: <span>8 itens</span></p>
                 <p data-month="2">FEV: <span>3 itens</span></p>
                 <p data-month="3">MAR: <span>3 itens</span></p>
                 <p data-month="4">ABR: <span>11 itens</span></p>
@@ -100,6 +111,7 @@
                 <p class="summary-line">Valor Total (Período): <span class="font-semibold pending-value">R$ 4.149.537,80</span></p>
             </div>
         </section>
+
         <section class="data-card">
             <h2 class="card-title"><i data-lucide="file-warning" style="color: #f97316;"></i>Relatórios Pendentes</h2>
             <p class="card-subtitle-custom">Quantidade de Itens (2025)</p>
@@ -121,13 +133,13 @@
                 <p class="summary-line">Valor Total (Período): <span class="font-semibold pending-value">R$ 1.404.234,25</span></p>
             </div>
         </section>
+
     </main>
 
     <footer class="mt-6 text-center text-sm text-gray-500"> 
-        Atualizado em: 03/09/2025 16:02. 
+        Atualizado em: 03/09/2025 16:53. 
     </footer>
 
-    <!-- O SCRIPT DOS GRÁFICOS E LÓGICA DE VISUALIZAÇÃO ENTRAM AQUI -->
     
     <script>
         window.addEventListener('load', () => {
@@ -144,11 +156,36 @@
                     return isCurrency ? formatCurrency(value) : formatInt(value);
                 };
 
-                const baseChartOptions = { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: { callback: (val) => formatAxisTick(val, true) } }, x: { grid: { display: false } } }, plugins: { legend: {display: false}, tooltip: { callbacks: { label: (c) => `${c.dataset.label || ''}: ${formatCurrency(c.parsed.y)}` } } } };
+                const baseChartOptions = { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: { callback: (val) => formatAxisTick(val, true) } }, x: { grid: { display: false } } }, plugins: { legend: {display: true}, tooltip: { callbacks: { label: (c) => `${c.dataset.label || ''}: ${formatCurrency(c.parsed.y)}` } } } };
                 const integerChartOptions = { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: { precision: 0, callback: (val) => formatAxisTick(val, false) } }, x: { grid: { display: false } } }, plugins: { legend: { display: false }, tooltip: { callbacks: { label: (c) => `${c.dataset.label || ''}: ${formatInt(c.parsed.y)}` } } } };
 
-                new Chart(document.getElementById('faturamentoChart'), { type: 'bar', data: { labels: chartLabels, datasets: [{ label: 'Faturamento', data: [3051082.160001084, 4596221.51, 1919979.8375, 3989318.0695, 4113922.92, 5149914.38, 3874394.985, 3765393.99, 800561.785, 0, 0, 0].slice(0, mesAtual), backgroundColor: 'rgba(79, 70, 229, 0.6)' }] }, options: baseChartOptions });
-                new Chart(document.getElementById('vendasChart'), { type: 'bar', data: { labels: chartLabels, datasets: [{ label: 'Vendas', data: [3625747.54, 5041956.447, 1598869.99, 5163189.39, 3702842.07, 3573486.005, 3954375.58, 3892543.08, 106694.0, 0, 58878.15, 0].slice(0, mesAtual), backgroundColor: 'rgba(22, 163, 74, 0.6)' }] }, options: baseChartOptions });
+                // --- GRÁFICO DE FATURAMENTO ATUALIZADO (MISTO) ---
+                new Chart(document.getElementById('faturamentoChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: chartLabels,
+                        datasets: [
+                            {
+                                label: 'Faturamento 2025',
+                                type: 'bar',
+                                data: [3051082.160001084, 4596221.51, 1919979.8375, 3989318.0695, 4113922.92, 5149914.38, 3874394.985, 3765393.99, 800561.785, 0, 0, 0].slice(0, mesAtual),
+                                backgroundColor: 'rgba(79, 70, 229, 0.6)'
+                            },
+                            {
+                                label: 'Faturamento 2024',
+                                type: 'line',
+                                data: [1824652.9, 4467504.65, 2975037.28, 2716008.43, 2080842.325, 2287974.69, 6118226.295, 2478803.77, 3504195.41, 2266822.8002, 2398814.7795, 3300120.113865].slice(0, mesAtual),
+                                borderColor: 'rgba(220, 38, 38, 0.8)',
+                                backgroundColor: 'rgba(220, 38, 38, 0.1)',
+                                tension: 0.1,
+                                fill: false
+                            }
+                        ]
+                    },
+                    options: baseChartOptions
+                });
+
+                new Chart(document.getElementById('vendasChart'), { type: 'bar', data: { labels: chartLabels, datasets: [{ label: 'Vendas', data: [3625747.54, 5041956.447, 1598869.99, 5163189.39, 3702842.07, 3573486.005, 3954375.58, 3892543.08, 106694.0, 0, 58878.15, 0].slice(0, mesAtual), backgroundColor: 'rgba(22, 163, 74, 0.6)' }] }, options: {...baseChartOptions, plugins: {...baseChartOptions.plugins, legend:{display:false} } } });
                 new Chart(document.getElementById('bmPendenteChart'), { type: 'bar', data: { labels: chartLabels, datasets: [{ label: 'Itens', data: [8, 3, 3, 11, 10, 12, 6, 38, 15, 0, 0, 1].slice(0, mesAtual), backgroundColor: 'rgba(220, 38, 38, 0.6)' }] }, options: integerChartOptions });
                 new Chart(document.getElementById('relatoriosPendentesChart'), { type: 'bar', data: { labels: chartLabels, datasets: [{ label: 'Itens', data: [4, 3, 4, 2, 6, 3, 5, 15, 2, 0, 0, 0].slice(0, mesAtual), backgroundColor: 'rgba(249, 115, 22, 0.6)' }] }, options: integerChartOptions });
             
@@ -161,16 +198,19 @@
 
     <script>
         window.addEventListener('load', () => {
-            lucide.createIcons();
-            const mesAtual = parseInt('9', 10) || new Date().getMonth() + 1;
-            const elementosMes = document.querySelectorAll('.monthly-data p[data-month]');
-            elementosMes.forEach(el => {
-                const mesDoElemento = parseInt(el.getAttribute('data-month'), 10);
-                if (mesDoElemento > mesAtual) {
-                    el.style.display = 'none';
-                }
-            });
+            try {
+                lucide.createIcons();
+                const mesAtual = parseInt('9', 10) || new Date().getMonth() + 1;
+                document.querySelectorAll('.monthly-data p[data-month]').forEach(el => {
+                    if (parseInt(el.getAttribute('data-month'), 10) > mesAtual) {
+                        el.style.display = 'none';
+                    }
+                });
+            } catch (error) {
+                console.error("Erro ao ajustar meses:", error);
+            }
         });
     </script>
 </body>
 </html>
+
