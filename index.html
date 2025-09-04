@@ -103,8 +103,8 @@
                 <p data-month="5">MAI: <span>10 itens</span></p>
                 <p data-month="6">JUN: <span>12 itens</span></p>
                 <p data-month="7">JUL: <span>6 itens</span></p>
-                <p data-month="8">AGO: <span>38 itens</span></p>
-                <p data-month="9">SET: <span>15 itens</span></p>
+                <p data-month="8">AGO: <span>37 itens</span></p>
+                <p data-month="9">SET: <span>16 itens</span></p>
                 <p data-month="10">OUT: <span>0 itens</span></p>
                 <p data-month="11">NOV: <span>0 itens</span></p>
                 <p data-month="12">DEZ: <span>1 itens</span></p>
@@ -137,7 +137,7 @@
     </main>
 
     <footer class="mt-6 text-center text-sm text-gray-500"> 
-        Atualizado em: 03/09/2025 17:01. 
+        Atualizado em: 04/09/2025 09:01. 
     </footer>
 
     
@@ -186,7 +186,7 @@
                 });
 
                 new Chart(document.getElementById('vendasChart'), { type: 'bar', data: { labels: chartLabels, datasets: [{ label: 'Vendas', data: [3625747.54, 5041956.447, 1598869.99, 5163189.39, 3702842.07, 3573486.005, 3954375.58, 3892543.08, 106694.0, 0, 58878.15, 0].slice(0, mesAtual), backgroundColor: 'rgba(22, 163, 74, 0.6)' }] }, options: {...baseChartOptions, plugins: {...baseChartOptions.plugins, legend:{display:false} } } });
-                new Chart(document.getElementById('bmPendenteChart'), { type: 'bar', data: { labels: chartLabels, datasets: [{ label: 'Itens', data: [8, 3, 3, 11, 10, 12, 6, 38, 15, 0, 0, 1].slice(0, mesAtual), backgroundColor: 'rgba(220, 38, 38, 0.6)' }] }, options: integerChartOptions });
+                new Chart(document.getElementById('bmPendenteChart'), { type: 'bar', data: { labels: chartLabels, datasets: [{ label: 'Itens', data: [8, 3, 3, 11, 10, 12, 6, 37, 16, 0, 0, 1].slice(0, mesAtual), backgroundColor: 'rgba(220, 38, 38, 0.6)' }] }, options: integerChartOptions });
                 new Chart(document.getElementById('relatoriosPendentesChart'), { type: 'bar', data: { labels: chartLabels, datasets: [{ label: 'Itens', data: [4, 3, 4, 2, 6, 3, 5, 15, 2, 0, 0, 0].slice(0, mesAtual), backgroundColor: 'rgba(249, 115, 22, 0.6)' }] }, options: integerChartOptions });
             
             } catch (error) {
