@@ -61,7 +61,6 @@
                 <p data-month="12">DEZ: <span>{{FATURAMENTO_MENSAL_DEZ}}</span></p>
                 <p class="summary-line">Média Mensal: <span class="font-semibold">{{FATURAMENTO_MEDIA}}</span></p>
                 
-                <!-- --- SEÇÃO DE COMPARAÇÃO ATUALIZADA --- -->
                 <div class="border-t border-dashed border-gray-200 mt-3 pt-3 text-sm">
                     <p class="flex justify-between text-gray-600">2024 (mesmo período): <span class="font-medium text-gray-700">{{FATURAMENTO_TOTAL_2024}}</span></p>
                     <p class="flex justify-between text-gray-600 mt-1">Variação Ano a Ano: <span class="font-bold {{FATURAMENTO_VARIACAO_CLASSE}}">{{FATURAMENTO_VARIACAO}}</span></p>
@@ -87,6 +86,12 @@
                 <p data-month="11">NOV: <span>{{VENDAS_MENSAL_NOV}}</span></p>
                 <p data-month="12">DEZ: <span>{{VENDAS_MENSAL_DEZ}}</span></p>
                 <p class="summary-line">Média Mensal: <span class="font-semibold">{{VENDAS_MEDIA}}</span></p>
+                
+                <!-- --- NOVA SEÇÃO DE COMPARAÇÃO PARA VENDAS --- -->
+                <div class="border-t border-dashed border-gray-200 mt-3 pt-3 text-sm">
+                    <p class="flex justify-between text-gray-600">2024 (mesmo período): <span class="font-medium text-gray-700">{{VENDAS_TOTAL_2024}}</span></p>
+                    <p class="flex justify-between text-gray-600 mt-1">Variação Ano a Ano: <span class="font-bold {{VENDAS_VARIACAO_CLASSE}}">{{VENDAS_VARIACAO}}</span></p>
+                </div>
             </div>
         </section>
         

@@ -61,7 +61,6 @@
                 <p data-month="12">DEZ: <span>R$ 0,00</span></p>
                 <p class="summary-line">Média Mensal: <span class="font-semibold">R$ 3.473.421,07</span></p>
                 
-                <!-- --- SEÇÃO DE COMPARAÇÃO ATUALIZADA --- -->
                 <div class="border-t border-dashed border-gray-200 mt-3 pt-3 text-sm">
                     <p class="flex justify-between text-gray-600">2024 (mesmo período): <span class="font-medium text-gray-700">R$ 28.453.245,75</span></p>
                     <p class="flex justify-between text-gray-600 mt-1">Variação Ano a Ano: <span class="font-bold var-positive">+9,87%</span></p>
@@ -87,6 +86,12 @@
                 <p data-month="11">NOV: <span>R$ 58.878,15</span></p>
                 <p data-month="12">DEZ: <span>R$ 0,00</span></p>
                 <p class="summary-line">Média Mensal: <span class="font-semibold">R$ 3.406.633,79</span></p>
+                
+                <!-- --- NOVA SEÇÃO DE COMPARAÇÃO PARA VENDAS --- -->
+                <div class="border-t border-dashed border-gray-200 mt-3 pt-3 text-sm">
+                    <p class="flex justify-between text-gray-600">2024 (mesmo período): <span class="font-medium text-gray-700">R$ 34.727.690,21</span></p>
+                    <p class="flex justify-between text-gray-600 mt-1">Variação Ano a Ano: <span class="font-bold var-negative">-11,71%</span></p>
+                </div>
             </div>
         </section>
         
@@ -137,7 +142,7 @@
     </main>
 
     <footer class="mt-6 text-center text-sm text-gray-500"> 
-        Atualizado em: 04/09/2025 09:01. 
+        Atualizado em: 04/09/2025 09:22. 
     </footer>
 
     
@@ -159,7 +164,6 @@
                 const baseChartOptions = { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: { callback: (val) => formatAxisTick(val, true) } }, x: { grid: { display: false } } }, plugins: { legend: {display: true}, tooltip: { callbacks: { label: (c) => `${c.dataset.label || ''}: ${formatCurrency(c.parsed.y)}` } } } };
                 const integerChartOptions = { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: { precision: 0, callback: (val) => formatAxisTick(val, false) } }, x: { grid: { display: false } } }, plugins: { legend: { display: false }, tooltip: { callbacks: { label: (c) => `${c.dataset.label || ''}: ${formatInt(c.parsed.y)}` } } } };
 
-                // --- GRÁFICO DE FATURAMENTO ATUALIZADO (MISTO) ---
                 new Chart(document.getElementById('faturamentoChart'), {
                     type: 'bar',
                     data: {
@@ -185,7 +189,32 @@
                     options: baseChartOptions
                 });
 
-                new Chart(document.getElementById('vendasChart'), { type: 'bar', data: { labels: chartLabels, datasets: [{ label: 'Vendas', data: [3625747.54, 5041956.447, 1598869.99, 5163189.39, 3702842.07, 3573486.005, 3954375.58, 3892543.08, 106694.0, 0, 58878.15, 0].slice(0, mesAtual), backgroundColor: 'rgba(22, 163, 74, 0.6)' }] }, options: {...baseChartOptions, plugins: {...baseChartOptions.plugins, legend:{display:false} } } });
+                // --- GRÁFICO DE VENDAS ATUALIZADO (MISTO) ---
+                new Chart(document.getElementById('vendasChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: chartLabels,
+                        datasets: [
+                             {
+                                label: 'Vendas 2025',
+                                type: 'bar',
+                                data: [3625747.54, 5041956.447, 1598869.99, 5163189.39, 3702842.07, 3573486.005, 3954375.58, 3892543.08, 106694.0, 0, 58878.15, 0].slice(0, mesAtual),
+                                backgroundColor: 'rgba(22, 163, 74, 0.6)'
+                            },
+                            {
+                                label: 'Vendas 2024',
+                                type: 'line',
+                                data: [2947344.25, 5970860.61, 2165748.24, 5691777.4350000005, 2205878.57, 6587834.3852, 2523619.13, 5096632.575, 1537995.01, 2067807.32, 1992723.2695010842, 1555104.033865].slice(0, mesAtual),
+                                borderColor: 'rgba(220, 38, 38, 0.8)',
+                                backgroundColor: 'rgba(220, 38, 38, 0.1)',
+                                tension: 0.1,
+                                fill: false
+                            }
+                        ]
+                    },
+                    options: baseChartOptions
+                });
+
                 new Chart(document.getElementById('bmPendenteChart'), { type: 'bar', data: { labels: chartLabels, datasets: [{ label: 'Itens', data: [8, 3, 3, 11, 10, 12, 6, 37, 16, 0, 0, 1].slice(0, mesAtual), backgroundColor: 'rgba(220, 38, 38, 0.6)' }] }, options: integerChartOptions });
                 new Chart(document.getElementById('relatoriosPendentesChart'), { type: 'bar', data: { labels: chartLabels, datasets: [{ label: 'Itens', data: [4, 3, 4, 2, 6, 3, 5, 15, 2, 0, 0, 0].slice(0, mesAtual), backgroundColor: 'rgba(249, 115, 22, 0.6)' }] }, options: integerChartOptions });
             
