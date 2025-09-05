@@ -249,7 +249,7 @@ def gerar_dashboard(ano_atual, mes_atual):
     variacao_vendas = ((ven_total_comp - ven_total_2024_comp) / ven_total_2024_comp * 100) if ven_total_2024_comp > 0 else 0
     variacao_vendas_classe = "var-positive" if variacao_vendas >= 0 else "var-negative"
     
-    print("\nPasso 2: Atualizando o arquivo do dashboard...")
+    print("\nPasso 2: Atualizando o novo arquivo do dashboard...")
     try:
         with open(NOME_TEMPLATE_HTML, 'r', encoding='utf-8') as f:
             html_final = f.read()
