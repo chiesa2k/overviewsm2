@@ -62,8 +62,8 @@
                 <p class="summary-line">Média Mensal: <span class="font-semibold">R$ 3.486.433,96</span></p>
                 
                 <div class="border-t border-dashed border-gray-200 mt-3 pt-3 text-sm">
-                    <p class="flex justify-between text-gray-600">2024 (mesmo período): <span class="font-medium text-gray-700">R$ 28.453.245,75</span></p>
-                    <p class="flex justify-between text-gray-600 mt-1">Variação Ano a Ano: <span class="font-bold var-positive">+10,28%</span></p>
+                    <p class="flex justify-between text-gray-600">2024 (mesmo período): <span class="font-medium text-gray-700">R$ 24.949.050,34</span></p>
+                    <p class="flex justify-between text-gray-600 mt-1">Variação Ano a Ano: <span class="font-bold var-positive">+22,09%</span></p>
                 </div>
             </div>
         </section>
@@ -89,8 +89,8 @@
                 
                 <!-- --- NOVA SEÇÃO DE COMPARAÇÃO PARA VENDAS --- -->
                 <div class="border-t border-dashed border-gray-200 mt-3 pt-3 text-sm">
-                    <p class="flex justify-between text-gray-600">2024 (mesmo período): <span class="font-medium text-gray-700">R$ 34.727.690,21</span></p>
-                    <p class="flex justify-between text-gray-600 mt-1">Variação Ano a Ano: <span class="font-bold var-negative">-11,63%</span></p>
+                    <p class="flex justify-between text-gray-600">2024 (mesmo período): <span class="font-medium text-gray-700">R$ 33.189.695,20</span></p>
+                    <p class="flex justify-between text-gray-600 mt-1">Variação Ano a Ano: <span class="font-bold var-negative">-7,94%</span></p>
                 </div>
             </div>
         </section>
@@ -142,14 +142,14 @@
     </main>
 
     <footer class="mt-6 text-center text-sm text-gray-500"> 
-        Atualizado em: 05/09/2025 11:01. 
+        Atualizado em: 05/09/2025 11:20. 
     </footer>
 
     
     <script>
         window.addEventListener('load', () => {
             try {
-                const mesAtual = 9;
+                const mesAtual = 8;
                 const todosOsMeses = ['JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN', 'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ'];
                 const chartLabels = todosOsMeses.slice(0, mesAtual);
 
@@ -189,7 +189,6 @@
                     options: baseChartOptions
                 });
 
-                // --- GRÁFICO DE VENDAS ATUALIZADO (MISTO) ---
                 new Chart(document.getElementById('vendasChart'), {
                     type: 'bar',
                     data: {

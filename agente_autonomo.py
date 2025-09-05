@@ -48,6 +48,9 @@ def get_dados_mensais(df: pd.DataFrame, coluna_data: str, tipo_agregacao: str = 
 
 def calcular_faturamento(ano: int, mes_limite: int) -> tuple[float, dict, float]:
     """Calcula faturamento total do período, dados mensais e média."""
+    if mes_limite == 0: # Adiciona verificação para o caso de ser Janeiro
+        return 0, {m: 0 for m in MESES_MAP.values()}, 0
+
     query = f"""
         SELECT "DATA (FATURAMENTO)", "VALOR - VENDA (TOTAL) DESC."
         FROM Vendas 
@@ -64,6 +67,9 @@ def calcular_faturamento(ano: int, mes_limite: int) -> tuple[float, dict, float]
 
 def calcular_vendas(ano: int, mes_limite: int) -> tuple[float, dict, float]:
     """Calcula vendas totais, mensais e a média para um ano específico."""
+    if mes_limite == 0:
+        return 0, {m: 0 for m in MESES_MAP.values()}, 0
+        
     query = f"""
         SELECT "DATA (RECEBIMENTO PO)", "VALOR - VENDA (TOTAL) DESC."
         FROM Vendas 
@@ -79,6 +85,9 @@ def calcular_vendas(ano: int, mes_limite: int) -> tuple[float, dict, float]:
 
 def calcular_pendentes(tipo: str, ano: int, mes_limite: int) -> tuple[int, float, dict]:
     """Calcula BMs ou Relatórios pendentes para um ano e período específicos."""
+    if mes_limite == 0:
+        return 0, 0, {m: 0 for m in MESES_MAP.values()}
+
     if tipo == "bm":
         data_ref_pd, data_vazia_pd = 'DATA (ENVIO DOS RELATÓRIOS)', 'DATA (LIBERAÇÃO BM)'
     else: # relatorios
@@ -121,7 +130,7 @@ def gerar_script_graficos(dados: dict, mes_limite: int) -> str:
     fat_mensal_lista = list(dados.get("FATURAMENTO_MENSAL", {}).values())
     fat_mensal_2024_lista = list(dados.get("FATURAMENTO_MENSAL_2024", {}).values())
     ven_mensal_lista = list(dados.get("VENDAS_MENSAL", {}).values())
-    ven_mensal_2024_lista = list(dados.get("VENDAS_MENSAL_2024", {}).values()) # <<< NOVO
+    ven_mensal_2024_lista = list(dados.get("VENDAS_MENSAL_2024", {}).values())
     bm_mensal_lista = list(dados.get("BM_PENDENTE_MENSAL", {}).values())
     rel_mensal_lista = list(dados.get("RELATORIOS_PENDENTES_MENSAL", {}).values())
 
@@ -169,7 +178,6 @@ def gerar_script_graficos(dados: dict, mes_limite: int) -> str:
                     options: baseChartOptions
                 }});
 
-                // --- GRÁFICO DE VENDAS ATUALIZADO (MISTO) ---
                 new Chart(document.getElementById('vendasChart'), {{
                     type: 'bar',
                     data: {{
@@ -210,25 +218,36 @@ def gerar_dashboard(ano_atual, mes_atual):
     """Função principal que orquestra o cálculo e a criação do HTML."""
     agora = datetime.now()
     
+    # --- LÓGICA DE COMPARAÇÃO AJUSTADA ---
+    mes_limite_comparacao = mes_atual - 1
+    ano_anterior = ano_atual - 1
+    
     print(f"Agente Autonomo Final iniciado.")
-    print(f"Ano de Analise: {ano_atual}, Mes de Analise: {mes_atual}")
+    # O dashboard mostra o mês atual, mas a comparação é baseada no mês anterior
+    print(f"Ano de Analise: {ano_atual}, Mes de Exibicao: {mes_atual}, Mes de Comparacao: {mes_limite_comparacao}")
     print("-" * 30)
     
     print("Passo 1: Calculando indicadores...")
+    # Totais para exibição principal são calculados até o mês atual
     fat_total, fat_mensal, fat_media = calcular_faturamento(ano_atual, mes_atual)
-    fat_total_2024, fat_mensal_2024, _ = calcular_faturamento(ano_atual - 1, mes_atual)
-    
     ven_total, ven_mensal, ven_media = calcular_vendas(ano_atual, mes_atual)
-    ven_total_2024, ven_mensal_2024, _ = calcular_vendas(ano_atual - 1, mes_atual) # <<< NOVO
+    
+    # Totais para a COMPARAÇÃO são calculados até o mês anterior
+    fat_total_comp, _, _ = calcular_faturamento(ano_atual, mes_limite_comparacao)
+    fat_total_2024_comp, fat_mensal_2024, _ = calcular_faturamento(ano_anterior, mes_limite_comparacao)
+    
+    ven_total_comp, _, _ = calcular_vendas(ano_atual, mes_limite_comparacao)
+    ven_total_2024_comp, ven_mensal_2024, _ = calcular_vendas(ano_anterior, mes_limite_comparacao)
 
     bm_qtde, bm_valor, bm_mensal = calcular_pendentes("bm", ano_atual, mes_atual)
     rel_qtde, rel_valor, rel_mensal = calcular_pendentes("relatorio", ano_atual, mes_atual)
 
-    variacao_faturamento = ((fat_total - fat_total_2024) / fat_total_2024 * 100) if fat_total_2024 > 0 else 0
+    # Variações são calculadas com base nos totais do período de comparação
+    variacao_faturamento = ((fat_total_comp - fat_total_2024_comp) / fat_total_2024_comp * 100) if fat_total_2024_comp > 0 else 0
     variacao_faturamento_classe = "var-positive" if variacao_faturamento >= 0 else "var-negative"
     
-    variacao_vendas = ((ven_total - ven_total_2024) / ven_total_2024 * 100) if ven_total_2024 > 0 else 0 # <<< NOVO
-    variacao_vendas_classe = "var-positive" if variacao_vendas >= 0 else "var-negative" # <<< NOVO
+    variacao_vendas = ((ven_total_comp - ven_total_2024_comp) / ven_total_2024_comp * 100) if ven_total_2024_comp > 0 else 0
+    variacao_vendas_classe = "var-positive" if variacao_vendas >= 0 else "var-negative"
     
     print("\nPasso 2: Atualizando o arquivo do dashboard...")
     try:
@@ -238,15 +257,15 @@ def gerar_dashboard(ano_atual, mes_atual):
         dados_para_substituir = {
             "FATURAMENTO_TOTAL": formatar_moeda(fat_total),
             "FATURAMENTO_MEDIA": formatar_moeda(fat_media),
-            "FATURAMENTO_TOTAL_2024": formatar_moeda(fat_total_2024),
+            "FATURAMENTO_TOTAL_2024": formatar_moeda(fat_total_2024_comp),
             "FATURAMENTO_VARIACAO": f"{variacao_faturamento:+.2f}%".replace('.',','),
             "FATURAMENTO_VARIACAO_CLASSE": variacao_faturamento_classe,
             
             "VENDAS_TOTAL": formatar_moeda(ven_total),
             "VENDAS_MEDIA": formatar_moeda(ven_media),
-            "VENDAS_TOTAL_2024": formatar_moeda(ven_total_2024), # <<< NOVO
-            "VENDAS_VARIACAO": f"{variacao_vendas:+.2f}%".replace('.',','), # <<< NOVO
-            "VENDAS_VARIACAO_CLASSE": variacao_vendas_classe, # <<< NOVO
+            "VENDAS_TOTAL_2024": formatar_moeda(ven_total_2024_comp),
+            "VENDAS_VARIACAO": f"{variacao_vendas:+.2f}%".replace('.',','),
+            "VENDAS_VARIACAO_CLASSE": variacao_vendas_classe,
 
             "BM_PENDENTE_QTDE_TOTAL": str(bm_qtde),
             "BM_PENDENTE_VALOR_TOTAL": formatar_moeda(bm_valor),
@@ -254,7 +273,7 @@ def gerar_dashboard(ano_atual, mes_atual):
             "RELATORIOS_PENDENTES_VALOR_TOTAL": formatar_moeda(rel_valor),
             
             "DATA_ATUALIZACAO": agora.strftime("%d/%m/%Y %H:%M"),
-            "MES_ATUAL": str(mes_atual),
+            "MES_ATUAL": str(mes_atual), # Usado para exibir os meses corretos
             "MES_ATUAL_NOME": MESES_MAP.get(mes_atual, ''),
             "ANO_DE_ANALISE": str(ano_atual),
         }
@@ -271,11 +290,12 @@ def gerar_dashboard(ano_atual, mes_atual):
             "FATURAMENTO_MENSAL": fat_mensal, 
             "FATURAMENTO_MENSAL_2024": fat_mensal_2024,
             "VENDAS_MENSAL": ven_mensal, 
-            "VENDAS_MENSAL_2024": ven_mensal_2024, # <<< NOVO
+            "VENDAS_MENSAL_2024": ven_mensal_2024,
             "BM_PENDENTE_MENSAL": bm_mensal,
             "RELATORIOS_PENDENTES_MENSAL": rel_mensal,
         }
-        script_graficos = gerar_script_graficos(dados_graficos, mes_atual)
+        # O gráfico comparativo também usa o mes_limite_comparacao para ser justo
+        script_graficos = gerar_script_graficos(dados_graficos, mes_limite_comparacao)
         html_final = html_final.replace("{{GRAFICOS_SCRIPT}}", script_graficos)
 
         with open(NOME_OUTPUT_HTML, "w", encoding="utf-8") as f:
