@@ -54,15 +54,23 @@ def calcular_faturamento_mensal(ano: int) -> dict:
     query = f"""
         SELECT 
             "DATA (FATURAMENTO)", 
-            "VALOR - VENDA (SERVIÇO) DESC" -- ALTERADO CONFORME SOLICITADO
+            "VALOR - VENDA (SERVIÇO) DESC"
         FROM Vendas 
-        -- A lógica de filtro por "ATENDIMENTO (ANDAMENTO)" foi removida conforme solicitado.
-        -- O faturamento agora é a soma simples dos valores de serviço por data.
         WHERE strftime('%Y', "DATA (FATURAMENTO)") = '{ano}';
     """
     df = executar_consulta(query)
-    # A chamada agora especifica a nova coluna de valor
-    return get_dados_mensais(df.copy(), "DATA (FATURAMENTO)", tipo_agregacao='valor', coluna_valor="VALOR - VENDA (SERVIÇO) DESC")
+    
+    # --- LÓGICA DE LIMPEZA DE DADOS ADICIONADA ---
+    # Garante que a coluna de valor seja tratada como número antes do cálculo.
+    coluna_servico = "VALOR - VENDA (SERVIÇO) DESC"
+    if coluna_servico in df.columns:
+        df[coluna_servico] = pd.to_numeric(
+            df[coluna_servico].astype(str).str.replace('R$', '', regex=False).str.replace('.', '', regex=False).str.replace(',', '.', regex=False),
+            errors='coerce'
+        ).fillna(0)
+
+    # A chamada agora usa a coluna de valor já limpa.
+    return get_dados_mensais(df.copy(), "DATA (FATURAMENTO)", tipo_agregacao='valor', coluna_valor=coluna_servico)
 
 def calcular_vendas_mensal(ano: int) -> dict:
     """Calcula as vendas mensais para um ano inteiro."""
