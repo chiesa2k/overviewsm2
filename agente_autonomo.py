@@ -52,14 +52,14 @@ def get_dados_mensais(df: pd.DataFrame, coluna_data: str, tipo_agregacao: str = 
     return {MESES_MAP[mes_num]: dados_mensais.get(mes_num, 0) for mes_num in range(1, 13)}
 
 def calcular_faturamento_mensal(ano: int) -> dict:
-    """Calcula o faturamento mensal para um ano inteiro, aplicando a lógica de negócio correta."""
+    """Calcula o faturamento mensal para um ano inteiro, com base no valor total da venda."""
     query = f"""
         SELECT 
             "DATA (FATURAMENTO)", 
             "VALOR - VENDA (TOTAL) DESC."
         FROM Vendas 
-        WHERE "ATENDIMENTO (ANDAMENTO)" IN ('Finalizado Com Faturamento', 'Falta Recebimento')
-        AND strftime('%Y', "DATA (FATURAMENTO)") = '{ano}';
+        -- O filtro por "ATENDIMENTO (ANDAMENTO)" foi removido para refletir a soma total por data.
+        WHERE strftime('%Y', "DATA (FATURAMENTO)") = '{ano}';
     """
     df = executar_consulta(query)
     return get_dados_mensais(df.copy(), "DATA (FATURAMENTO)")
@@ -312,4 +312,3 @@ if __name__ == "__main__":
     print("-" * 30)
     print("Processo Concluido!")
     print(f"Abra o arquivo '{NOME_OUTPUT_HTML}' para ver o resultado.")
-
