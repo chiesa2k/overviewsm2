@@ -65,16 +65,15 @@ def calcular_faturamento_mensal(ano: int) -> dict:
     return get_dados_mensais(df.copy(), "DATA (FATURAMENTO)")
 
 def calcular_vendas_mensal(ano: int) -> dict:
-    """Calcula as vendas mensais (baseado em serviço) para um ano inteiro."""
-    coluna_vendas_servico = "VALOR - VENDA (SERVIÇO) DESC"
+    """Calcula as vendas mensais (baseado no valor total) para um ano inteiro."""
     query = f"""
-        SELECT "DATA (RECEBIMENTO PO)", "{coluna_vendas_servico}"
+        SELECT "DATA (RECEBIMENTO PO)", "VALOR - VENDA (TOTAL) DESC."
         FROM Vendas 
         WHERE strftime('%Y', "DATA (RECEBIMENTO PO)") = '{ano}';
     """
     df = executar_consulta(query)
-    # Passa a coluna correta para a função de agregação
-    return get_dados_mensais(df.copy(), "DATA (RECEBIMENTO PO)", coluna_valor=coluna_vendas_servico)
+    # A função get_dados_mensais já usa "VALOR - VENDA (TOTAL) DESC." como padrão
+    return get_dados_mensais(df.copy(), "DATA (RECEBIMENTO PO)")
 
 def calcular_pendentes(tipo: str, ano: int, mes_limite: int) -> tuple[int, float, dict]:
     """Calcula BMs ou Relatórios pendentes para um ano e período específicos."""
