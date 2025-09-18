@@ -125,7 +125,7 @@ class NumpyEncoder(json.JSONEncoder):
         if isinstance(obj, (np.floating, np.float64)): return float(obj)
         return super(NumpyEncoder, self).default(obj)
 
-def gerar_script_graficos(dados: dict, mes_limite: int) -> str:
+def gerar_script_graficos(dados: dict, mes_limite_grafico: int) -> str:
     """Gera o bloco <script> completo para os gráficos."""
     fat_mensal_lista = list(dados.get("FATURAMENTO_MENSAL", {}).values())
     fat_mensal_2024_lista = list(dados.get("FATURAMENTO_MENSAL_2024", {}).values())
@@ -138,9 +138,9 @@ def gerar_script_graficos(dados: dict, mes_limite: int) -> str:
     <script>
         window.addEventListener('load', () => {{
             try {{
-                const mesAtual = {mes_limite};
+                const mesLimiteGrafico = {mes_limite_grafico};
                 const todosOsMeses = ['JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN', 'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ'];
-                const chartLabels = todosOsMeses.slice(0, mesAtual);
+                const chartLabels = todosOsMeses.slice(0, mesLimiteGrafico);
 
                 const formatCurrency = (value) => (value || 0).toLocaleString('pt-BR', {{ style: 'currency', currency: 'BRL' }});
                 const formatInt = (value) => (value || 0).toLocaleString('pt-BR');
@@ -161,13 +161,13 @@ def gerar_script_graficos(dados: dict, mes_limite: int) -> str:
                             {{
                                 label: 'Faturamento 2025',
                                 type: 'bar',
-                                data: {json.dumps(fat_mensal_lista, cls=NumpyEncoder)}.slice(0, mesAtual),
+                                data: {json.dumps(fat_mensal_lista, cls=NumpyEncoder)}.slice(0, mesLimiteGrafico),
                                 backgroundColor: 'rgba(79, 70, 229, 0.6)'
                             }},
                             {{
                                 label: 'Faturamento 2024',
                                 type: 'line',
-                                data: {json.dumps(fat_mensal_2024_lista, cls=NumpyEncoder)}.slice(0, mesAtual),
+                                data: {json.dumps(fat_mensal_2024_lista, cls=NumpyEncoder)}.slice(0, mesLimiteGrafico),
                                 borderColor: 'rgba(220, 38, 38, 0.8)',
                                 backgroundColor: 'rgba(220, 38, 38, 0.1)',
                                 tension: 0.1,
@@ -186,13 +186,13 @@ def gerar_script_graficos(dados: dict, mes_limite: int) -> str:
                              {{
                                 label: 'Vendas 2025',
                                 type: 'bar',
-                                data: {json.dumps(ven_mensal_lista, cls=NumpyEncoder)}.slice(0, mesAtual),
+                                data: {json.dumps(ven_mensal_lista, cls=NumpyEncoder)}.slice(0, mesLimiteGrafico),
                                 backgroundColor: 'rgba(22, 163, 74, 0.6)'
                             }},
                             {{
                                 label: 'Vendas 2024',
                                 type: 'line',
-                                data: {json.dumps(ven_mensal_2024_lista, cls=NumpyEncoder)}.slice(0, mesAtual),
+                                data: {json.dumps(ven_mensal_2024_lista, cls=NumpyEncoder)}.slice(0, mesLimiteGrafico),
                                 borderColor: 'rgba(220, 38, 38, 0.8)',
                                 backgroundColor: 'rgba(220, 38, 38, 0.1)',
                                 tension: 0.1,
@@ -203,8 +203,8 @@ def gerar_script_graficos(dados: dict, mes_limite: int) -> str:
                     options: baseChartOptions
                 }});
 
-                new Chart(document.getElementById('bmPendenteChart'), {{ type: 'bar', data: {{ labels: chartLabels, datasets: [{{ label: 'Itens', data: {json.dumps(bm_mensal_lista, cls=NumpyEncoder)}.slice(0, mesAtual), backgroundColor: 'rgba(220, 38, 38, 0.6)' }}] }}, options: integerChartOptions }});
-                new Chart(document.getElementById('relatoriosPendentesChart'), {{ type: 'bar', data: {{ labels: chartLabels, datasets: [{{ label: 'Itens', data: {json.dumps(rel_mensal_lista, cls=NumpyEncoder)}.slice(0, mesAtual), backgroundColor: 'rgba(249, 115, 22, 0.6)' }}] }}, options: integerChartOptions }});
+                new Chart(document.getElementById('bmPendenteChart'), {{ type: 'bar', data: {{ labels: chartLabels, datasets: [{{ label: 'Itens', data: {json.dumps(bm_mensal_lista, cls=NumpyEncoder)}.slice(0, mesLimiteGrafico), backgroundColor: 'rgba(220, 38, 38, 0.6)' }}] }}, options: integerChartOptions }});
+                new Chart(document.getElementById('relatoriosPendentesChart'), {{ type: 'bar', data: {{ labels: chartLabels, datasets: [{{ label: 'Itens', data: {json.dumps(rel_mensal_lista, cls=NumpyEncoder)}.slice(0, mesLimiteGrafico), backgroundColor: 'rgba(249, 115, 22, 0.6)' }}] }}, options: integerChartOptions }});
             
             }} catch (error) {{
                 console.error("ERRO ao desenhar os gráficos:", error);
@@ -222,7 +222,7 @@ def gerar_dashboard(ano_atual, mes_atual):
     ano_anterior = ano_atual - 1
     
     print(f"Agente Autonomo Final iniciado.")
-    print(f"Ano de Analise: {ano_atual}, Mes de Exibicao: {mes_atual}, Mes de Comparacao: {mes_limite_comparacao}")
+    print(f"Ano de Analise: {ano_atual}, Mes de Exibicao: {mes_atual}, Mes de Comparacao e Graficos: {mes_limite_comparacao}")
     print("-" * 30)
     
     print("Passo 1: Calculando indicadores...")
@@ -289,9 +289,10 @@ def gerar_dashboard(ano_atual, mes_atual):
             "BM_PENDENTE_MENSAL": bm_mensal,
             "RELATORIOS_PENDENTES_MENSAL": rel_mensal,
         }
+        
         # --- CORREÇÃO APLICADA AQUI ---
-        # Os gráficos devem exibir os dados até o mês atual para consistência visual.
-        script_graficos = gerar_script_graficos(dados_graficos, mes_atual)
+        # Os gráficos devem ser limitados pelo mês anterior para consistência visual.
+        script_graficos = gerar_script_graficos(dados_graficos, mes_limite_comparacao)
         html_final = html_final.replace("{{GRAFICOS_SCRIPT}}", script_graficos)
 
         with open(NOME_OUTPUT_HTML, "w", encoding="utf-8") as f:

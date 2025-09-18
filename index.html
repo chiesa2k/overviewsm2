@@ -142,16 +142,16 @@
     </main>
 
     <footer class="mt-6 text-center text-sm text-gray-500"> 
-        Atualizado em: 18/09/2025 08:27. 
+        Atualizado em: 18/09/2025 08:31. 
     </footer>
 
     
     <script>
         window.addEventListener('load', () => {
             try {
-                const mesAtual = 9;
+                const mesLimiteGrafico = 8;
                 const todosOsMeses = ['JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN', 'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ'];
-                const chartLabels = todosOsMeses.slice(0, mesAtual);
+                const chartLabels = todosOsMeses.slice(0, mesLimiteGrafico);
 
                 const formatCurrency = (value) => (value || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
                 const formatInt = (value) => (value || 0).toLocaleString('pt-BR');
@@ -172,13 +172,13 @@
                             {
                                 label: 'Faturamento 2025',
                                 type: 'bar',
-                                data: [3051082.160001084, 4586361.51, 1919979.8375, 3989318.0695, 4113922.92, 5149914.38, 3874394.985, 3854574.49, 1842467.385, 0, 0, 0].slice(0, mesAtual),
+                                data: [3051082.160001084, 4586361.51, 1919979.8375, 3989318.0695, 4113922.92, 5149914.38, 3874394.985, 3854574.49, 1842467.385, 0, 0, 0].slice(0, mesLimiteGrafico),
                                 backgroundColor: 'rgba(79, 70, 229, 0.6)'
                             },
                             {
                                 label: 'Faturamento 2024',
                                 type: 'line',
-                                data: [1824652.9, 4467504.65, 2975037.28, 2716008.43, 2080842.325, 2287974.69, 6118226.295, 2478803.77, 3504195.41, 2266822.8002, 2398814.7795, 3300120.113865].slice(0, mesAtual),
+                                data: [1824652.9, 4467504.65, 2975037.28, 2716008.43, 2080842.325, 2287974.69, 6118226.295, 2478803.77, 3504195.41, 2266822.8002, 2398814.7795, 3300120.113865].slice(0, mesLimiteGrafico),
                                 borderColor: 'rgba(220, 38, 38, 0.8)',
                                 backgroundColor: 'rgba(220, 38, 38, 0.1)',
                                 tension: 0.1,
@@ -197,13 +197,13 @@
                              {
                                 label: 'Vendas 2025',
                                 type: 'bar',
-                                data: [3625747.54, 5271880.447, 1598869.99, 5202362.39, 3708687.27, 3567818.005, 3957175.58, 4127381.54, 704202.72, 0, 58878.15, 0].slice(0, mesAtual),
+                                data: [3625747.54, 5271880.447, 1598869.99, 5202362.39, 3708687.27, 3567818.005, 3957175.58, 4127381.54, 704202.72, 0, 58878.15, 0].slice(0, mesLimiteGrafico),
                                 backgroundColor: 'rgba(22, 163, 74, 0.6)'
                             },
                             {
                                 label: 'Vendas 2024',
                                 type: 'line',
-                                data: [2947344.25, 5970860.61, 2165748.24, 5691777.4350000005, 2205878.57, 6632257.3852, 2523619.13, 5096632.575, 1537995.01, 2067807.32, 1992723.2695010842, 1555104.033865].slice(0, mesAtual),
+                                data: [2947344.25, 5970860.61, 2165748.24, 5691777.4350000005, 2205878.57, 6632257.3852, 2523619.13, 5096632.575, 1537995.01, 2067807.32, 1992723.2695010842, 1555104.033865].slice(0, mesLimiteGrafico),
                                 borderColor: 'rgba(220, 38, 38, 0.8)',
                                 backgroundColor: 'rgba(220, 38, 38, 0.1)',
                                 tension: 0.1,
@@ -214,8 +214,8 @@
                     options: baseChartOptions
                 });
 
-                new Chart(document.getElementById('bmPendenteChart'), { type: 'bar', data: { labels: chartLabels, datasets: [{ label: 'Itens', data: [8, 3, 3, 11, 9, 11, 6, 26, 30, 0, 0, 1].slice(0, mesAtual), backgroundColor: 'rgba(220, 38, 38, 0.6)' }] }, options: integerChartOptions });
-                new Chart(document.getElementById('relatoriosPendentesChart'), { type: 'bar', data: { labels: chartLabels, datasets: [{ label: 'Itens', data: [4, 3, 4, 2, 6, 3, 5, 5, 11, 0, 0, 0].slice(0, mesAtual), backgroundColor: 'rgba(249, 115, 22, 0.6)' }] }, options: integerChartOptions });
+                new Chart(document.getElementById('bmPendenteChart'), { type: 'bar', data: { labels: chartLabels, datasets: [{ label: 'Itens', data: [8, 3, 3, 11, 9, 11, 6, 26, 30, 0, 0, 1].slice(0, mesLimiteGrafico), backgroundColor: 'rgba(220, 38, 38, 0.6)' }] }, options: integerChartOptions });
+                new Chart(document.getElementById('relatoriosPendentesChart'), { type: 'bar', data: { labels: chartLabels, datasets: [{ label: 'Itens', data: [4, 3, 4, 2, 6, 3, 5, 5, 11, 0, 0, 0].slice(0, mesLimiteGrafico), backgroundColor: 'rgba(249, 115, 22, 0.6)' }] }, options: integerChartOptions });
             
             } catch (error) {
                 console.error("ERRO ao desenhar os gráficos:", error);
