@@ -46,11 +46,8 @@ def get_dados_mensais(df: pd.DataFrame, coluna_data: str, tipo_agregacao: str = 
         dados_mensais = df.groupby('mes').size()
     return {MESES_MAP[mes_num]: dados_mensais.get(mes_num, 0) for mes_num in range(1, 13)}
 
-def calcular_faturamento(ano: int, mes_limite: int) -> tuple[float, dict, float]:
-    """Calcula faturamento total do período, dados mensais e média."""
-    if mes_limite == 0:
-        return 0, {m: 0 for m in MESES_MAP.values()}, 0
-
+def calcular_faturamento_mensal(ano: int) -> dict:
+    """Calcula o faturamento mensal para um ano inteiro."""
     query = f"""
         SELECT "DATA (FATURAMENTO)", "VALOR - VENDA (TOTAL) DESC."
         FROM Vendas 
@@ -58,30 +55,17 @@ def calcular_faturamento(ano: int, mes_limite: int) -> tuple[float, dict, float]
         AND strftime('%Y', "DATA (FATURAMENTO)") = '{ano}';
     """
     df = executar_consulta(query)
-    df['DATA (FATURAMENTO)'] = pd.to_datetime(df['DATA (FATURAMENTO)'], errors='coerce')
-    df_periodo = df[df["DATA (FATURAMENTO)"].dt.month <= mes_limite]
-    total = df_periodo["VALOR - VENDA (TOTAL) DESC."].sum()
-    mensal = get_dados_mensais(df.copy(), "DATA (FATURAMENTO)")
-    media = total / mes_limite if mes_limite > 0 else 0
-    return total, mensal, media
+    return get_dados_mensais(df.copy(), "DATA (FATURAMENTO)")
 
-def calcular_vendas(ano: int, mes_limite: int) -> tuple[float, dict, float]:
-    """Calcula vendas totais, mensais e a média para um ano específico."""
-    if mes_limite == 0:
-        return 0, {m: 0 for m in MESES_MAP.values()}, 0
-        
+def calcular_vendas_mensal(ano: int) -> dict:
+    """Calcula as vendas mensais para um ano inteiro."""
     query = f"""
         SELECT "DATA (RECEBIMENTO PO)", "VALOR - VENDA (TOTAL) DESC."
         FROM Vendas 
         WHERE strftime('%Y', "DATA (RECEBIMENTO PO)") = '{ano}';
     """
     df = executar_consulta(query)
-    df['DATA (RECEBIMENTO PO)'] = pd.to_datetime(df['DATA (RECEBIMENTO PO)'], errors='coerce')
-    df_periodo = df[df["DATA (RECEBIMENTO PO)"].dt.month <= mes_limite]
-    total = df_periodo["VALOR - VENDA (TOTAL) DESC."].sum()
-    mensal = get_dados_mensais(df.copy(), "DATA (RECEBIMENTO PO)")
-    media = total / mes_limite if mes_limite > 0 else 0
-    return total, mensal, media
+    return get_dados_mensais(df.copy(), "DATA (RECEBIMENTO PO)")
 
 def calcular_pendentes(tipo: str, ano: int, mes_limite: int) -> tuple[int, float, dict]:
     """Calcula BMs ou Relatórios pendentes para um ano e período específicos."""
@@ -226,14 +210,24 @@ def gerar_dashboard(ano_atual, mes_atual):
     print("-" * 30)
     
     print("Passo 1: Calculando indicadores...")
-    fat_total, fat_mensal, fat_media = calcular_faturamento(ano_atual, mes_atual)
-    ven_total, ven_mensal, ven_media = calcular_vendas(ano_atual, mes_atual)
-    
-    fat_total_comp, _, _ = calcular_faturamento(ano_atual, mes_limite_comparacao)
-    fat_total_2024_comp, fat_mensal_2024, _ = calcular_faturamento(ano_anterior, mes_limite_comparacao)
-    
-    ven_total_comp, _, _ = calcular_vendas(ano_atual, mes_limite_comparacao)
-    ven_total_2024_comp, ven_mensal_2024, _ = calcular_vendas(ano_anterior, mes_limite_comparacao)
+    # Busca os dados mensais para o ano inteiro
+    fat_mensal = calcular_faturamento_mensal(ano_atual)
+    ven_mensal = calcular_vendas_mensal(ano_atual)
+    fat_mensal_2024 = calcular_faturamento_mensal(ano_anterior)
+    ven_mensal_2024 = calcular_vendas_mensal(ano_anterior)
+
+    # Calcula totais e médias com base nos dados mensais
+    fat_total = sum(list(fat_mensal.values())[:mes_atual])
+    ven_total = sum(list(ven_mensal.values())[:mes_atual])
+
+    fat_total_comp = sum(list(fat_mensal.values())[:mes_limite_comparacao])
+    fat_total_2024_comp = sum(list(fat_mensal_2024.values())[:mes_limite_comparacao])
+
+    ven_total_comp = sum(list(ven_mensal.values())[:mes_limite_comparacao])
+    ven_total_2024_comp = sum(list(ven_mensal_2024.values())[:mes_limite_comparacao])
+
+    fat_media_correta = fat_total_comp / mes_limite_comparacao if mes_limite_comparacao > 0 else 0
+    ven_media_correta = ven_total_comp / mes_limite_comparacao if mes_limite_comparacao > 0 else 0
 
     bm_qtde, bm_valor, bm_mensal = calcular_pendentes("bm", ano_atual, mes_atual)
     rel_qtde, rel_valor, rel_mensal = calcular_pendentes("relatorio", ano_atual, mes_atual)
@@ -251,13 +245,13 @@ def gerar_dashboard(ano_atual, mes_atual):
         
         dados_para_substituir = {
             "FATURAMENTO_TOTAL": formatar_moeda(fat_total),
-            "FATURAMENTO_MEDIA": formatar_moeda(fat_media),
+            "FATURAMENTO_MEDIA": formatar_moeda(fat_media_correta),
             "FATURAMENTO_TOTAL_2024": formatar_moeda(fat_total_2024_comp),
             "FATURAMENTO_VARIACAO": f"{variacao_faturamento:+.2f}%".replace('.',','),
             "FATURAMENTO_VARIACAO_CLASSE": variacao_faturamento_classe,
             
             "VENDAS_TOTAL": formatar_moeda(ven_total),
-            "VENDAS_MEDIA": formatar_moeda(ven_media),
+            "VENDAS_MEDIA": formatar_moeda(ven_media_correta),
             "VENDAS_TOTAL_2024": formatar_moeda(ven_total_2024_comp),
             "VENDAS_VARIACAO": f"{variacao_vendas:+.2f}%".replace('.',','),
             "VENDAS_VARIACAO_CLASSE": variacao_vendas_classe,
@@ -290,8 +284,6 @@ def gerar_dashboard(ano_atual, mes_atual):
             "RELATORIOS_PENDENTES_MENSAL": rel_mensal,
         }
         
-        # --- CORREÇÃO APLICADA AQUI ---
-        # Os gráficos devem ser limitados pelo mês anterior para consistência visual.
         script_graficos = gerar_script_graficos(dados_graficos, mes_limite_comparacao)
         html_final = html_final.replace("{{GRAFICOS_SCRIPT}}", script_graficos)
 
