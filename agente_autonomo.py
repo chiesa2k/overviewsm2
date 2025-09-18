@@ -47,11 +47,16 @@ def get_dados_mensais(df: pd.DataFrame, coluna_data: str, tipo_agregacao: str = 
     return {MESES_MAP[mes_num]: dados_mensais.get(mes_num, 0) for mes_num in range(1, 13)}
 
 def calcular_faturamento_mensal(ano: int) -> dict:
-    """Calcula o faturamento mensal para um ano inteiro."""
+    """Calcula o faturamento mensal para um ano inteiro, aplicando a lógica de negócio correta."""
     query = f"""
-        SELECT "DATA (FATURAMENTO)", "VALOR - VENDA (TOTAL) DESC."
+        SELECT 
+            "DATA (FATURAMENTO)", 
+            "VALOR - VENDA (TOTAL) DESC."
         FROM Vendas 
+        -- A lógica abaixo aplica os filtros de status de atendimento para o cálculo do faturamento.
+        -- Garante que apenas atendimentos faturados ou aguardando recebimento sejam contados.
         WHERE "ATENDIMENTO (ANDAMENTO)" IN ('Finalizado Com Faturamento', 'Falta Recebimento')
+        -- E garante que apenas os dados do ano de análise são considerados.
         AND strftime('%Y', "DATA (FATURAMENTO)") = '{ano}';
     """
     df = executar_consulta(query)
@@ -304,4 +309,3 @@ if __name__ == "__main__":
     print("-" * 30)
     print("Processo Concluido!")
     print(f"Abra o arquivo '{NOME_OUTPUT_HTML}' para ver o resultado.")
-
