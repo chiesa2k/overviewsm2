@@ -31,7 +31,7 @@ def executar_consulta(query: str) -> pd.DataFrame:
         conexao.close()
     return df
 
-def get_dados_mensais(df: pd.DataFrame, coluna_data: str, tipo_agregacao: str = 'valor') -> dict:
+def get_dados_mensais(df: pd.DataFrame, coluna_data: str, tipo_agregacao: str = 'valor', coluna_valor: str = "VALOR - VENDA (TOTAL) DESC.") -> dict:
     """Helper para agrupar dados por mês, retornando um dicionário com 12 meses."""
     if df.empty or coluna_data not in df.columns:
         return {mes_str: 0 for mes_str in MESES_MAP.values()}
@@ -41,26 +41,28 @@ def get_dados_mensais(df: pd.DataFrame, coluna_data: str, tipo_agregacao: str = 
         return {mes_str: 0 for mes_str in MESES_MAP.values()}
     df['mes'] = df[coluna_data].dt.month
     if tipo_agregacao == 'valor':
-        dados_mensais = df.groupby('mes')["VALOR - VENDA (TOTAL) DESC."].sum()
+        if coluna_valor not in df.columns:
+            print(f"AVISO: A coluna de valor '{coluna_valor}' não foi encontrada. O cálculo será zerado.")
+            return {mes_str: 0 for mes_str in MESES_MAP.values()}
+        dados_mensais = df.groupby('mes')[coluna_valor].sum()
     else: # contagem
         dados_mensais = df.groupby('mes').size()
     return {MESES_MAP[mes_num]: dados_mensais.get(mes_num, 0) for mes_num in range(1, 13)}
 
 def calcular_faturamento_mensal(ano: int) -> dict:
-    """Calcula o faturamento mensal para um ano inteiro, aplicando a lógica de negócio correta."""
+    """Calcula o faturamento mensal (baseado em serviços) para um ano inteiro."""
     query = f"""
         SELECT 
             "DATA (FATURAMENTO)", 
-            "VALOR - VENDA (TOTAL) DESC."
+            "VALOR - VENDA (SERVIÇO) DESC" -- ALTERADO CONFORME SOLICITADO
         FROM Vendas 
-        -- A lógica abaixo aplica os filtros de status de atendimento para o cálculo do faturamento.
-        -- Garante que apenas atendimentos faturados ou aguardando recebimento sejam contados.
-        WHERE "ATENDIMENTO (ANDAMENTO)" IN ('Finalizado Com Faturamento', 'Falta Recebimento')
-        -- E garante que apenas os dados do ano de análise são considerados.
-        AND strftime('%Y', "DATA (FATURAMENTO)") = '{ano}';
+        -- A lógica de filtro por "ATENDIMENTO (ANDAMENTO)" foi removida conforme solicitado.
+        -- O faturamento agora é a soma simples dos valores de serviço por data.
+        WHERE strftime('%Y', "DATA (FATURAMENTO)") = '{ano}';
     """
     df = executar_consulta(query)
-    return get_dados_mensais(df.copy(), "DATA (FATURAMENTO)")
+    # A chamada agora especifica a nova coluna de valor
+    return get_dados_mensais(df.copy(), "DATA (FATURAMENTO)", tipo_agregacao='valor', coluna_valor="VALOR - VENDA (SERVIÇO) DESC")
 
 def calcular_vendas_mensal(ano: int) -> dict:
     """Calcula as vendas mensais para um ano inteiro."""
@@ -309,3 +311,4 @@ if __name__ == "__main__":
     print("-" * 30)
     print("Processo Concluido!")
     print(f"Abra o arquivo '{NOME_OUTPUT_HTML}' para ver o resultado.")
+
