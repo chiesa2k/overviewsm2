@@ -31,7 +31,7 @@ def executar_consulta(query: str) -> pd.DataFrame:
         conexao.close()
     return df
 
-def get_dados_mensais(df: pd.DataFrame, coluna_data: str, tipo_agregacao: str = 'valor') -> dict:
+def get_dados_mensais(df: pd.DataFrame, coluna_data: str, tipo_agregacao: str = 'valor', coluna_valor: str = "VALOR - VENDA (TOTAL) DESC.") -> dict:
     """Helper para agrupar dados por mês, retornando um dicionário com 12 meses."""
     if df.empty or coluna_data not in df.columns:
         return {mes_str: 0 for mes_str in MESES_MAP.values()}
@@ -41,7 +41,12 @@ def get_dados_mensais(df: pd.DataFrame, coluna_data: str, tipo_agregacao: str = 
         return {mes_str: 0 for mes_str in MESES_MAP.values()}
     df['mes'] = df[coluna_data].dt.month
     if tipo_agregacao == 'valor':
-        dados_mensais = df.groupby('mes')["VALOR - VENDA (TOTAL) DESC."].sum()
+        if coluna_valor not in df.columns:
+            print(f"AVISO: A coluna de valor '{coluna_valor}' não foi encontrada. O cálculo será zerado.")
+            return {mes_str: 0 for mes_str in MESES_MAP.values()}
+        # Garante que a coluna de valor é numérica antes de somar
+        df[coluna_valor] = pd.to_numeric(df[coluna_valor], errors='coerce').fillna(0)
+        dados_mensais = df.groupby('mes')[coluna_valor].sum()
     else: # contagem
         dados_mensais = df.groupby('mes').size()
     return {MESES_MAP[mes_num]: dados_mensais.get(mes_num, 0) for mes_num in range(1, 13)}
@@ -53,24 +58,23 @@ def calcular_faturamento_mensal(ano: int) -> dict:
             "DATA (FATURAMENTO)", 
             "VALOR - VENDA (TOTAL) DESC."
         FROM Vendas 
-        -- A lógica abaixo aplica os filtros de status de atendimento para o cálculo do faturamento.
-        -- Garante que apenas atendimentos faturados ou aguardando recebimento sejam contados.
         WHERE "ATENDIMENTO (ANDAMENTO)" IN ('Finalizado Com Faturamento', 'Falta Recebimento')
-        -- E garante que apenas os dados do ano de análise são considerados.
         AND strftime('%Y', "DATA (FATURAMENTO)") = '{ano}';
     """
     df = executar_consulta(query)
     return get_dados_mensais(df.copy(), "DATA (FATURAMENTO)")
 
 def calcular_vendas_mensal(ano: int) -> dict:
-    """Calcula as vendas mensais para um ano inteiro."""
+    """Calcula as vendas mensais (baseado em serviço) para um ano inteiro."""
+    coluna_vendas_servico = "VALOR - VENDA (SERVIÇO) DESC"
     query = f"""
-        SELECT "DATA (RECEBIMENTO PO)", "VALOR - VENDA (TOTAL) DESC."
+        SELECT "DATA (RECEBIMENTO PO)", "{coluna_vendas_servico}"
         FROM Vendas 
         WHERE strftime('%Y', "DATA (RECEBIMENTO PO)") = '{ano}';
     """
     df = executar_consulta(query)
-    return get_dados_mensais(df.copy(), "DATA (RECEBIMENTO PO)")
+    # Passa a coluna correta para a função de agregação
+    return get_dados_mensais(df.copy(), "DATA (RECEBIMENTO PO)", coluna_valor=coluna_vendas_servico)
 
 def calcular_pendentes(tipo: str, ano: int, mes_limite: int) -> tuple[int, float, dict]:
     """Calcula BMs ou Relatórios pendentes para um ano e período específicos."""
@@ -309,3 +313,4 @@ if __name__ == "__main__":
     print("-" * 30)
     print("Processo Concluido!")
     print(f"Abra o arquivo '{NOME_OUTPUT_HTML}' para ver o resultado.")
+
