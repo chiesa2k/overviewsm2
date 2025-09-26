@@ -44,39 +44,35 @@ def get_dados_mensais(df: pd.DataFrame, coluna_data: str, tipo_agregacao: str = 
         if coluna_valor not in df.columns:
             print(f"AVISO: A coluna de valor '{coluna_valor}' não foi encontrada. O cálculo será zerado.")
             return {mes_str: 0 for mes_str in MESES_MAP.values()}
-        # Garante que a coluna de valor é numérica antes de somar
-        df[coluna_valor] = pd.to_numeric(df[coluna_valor], errors='coerce').fillna(0)
         dados_mensais = df.groupby('mes')[coluna_valor].sum()
     else: # contagem
         dados_mensais = df.groupby('mes').size()
     return {MESES_MAP[mes_num]: dados_mensais.get(mes_num, 0) for mes_num in range(1, 13)}
 
 def calcular_faturamento_mensal(ano: int) -> dict:
-    """Calcula o faturamento mensal para um ano inteiro, com base no valor total da venda."""
+    """Calcula o faturamento mensal (soma simples) para um ano inteiro."""
     query = f"""
         SELECT 
             "DATA (FATURAMENTO)", 
             "VALOR - VENDA (TOTAL) DESC."
         FROM Vendas 
-        -- O filtro por "ATENDIMENTO (ANDAMENTO)" foi removido para refletir a soma total por data.
         WHERE strftime('%Y', "DATA (FATURAMENTO)") = '{ano}';
     """
     df = executar_consulta(query)
     return get_dados_mensais(df.copy(), "DATA (FATURAMENTO)")
 
 def calcular_vendas_mensal(ano: int) -> dict:
-    """Calcula as vendas mensais (baseado no valor total) para um ano inteiro."""
+    """Calcula as vendas mensais para um ano inteiro."""
     query = f"""
         SELECT "DATA (RECEBIMENTO PO)", "VALOR - VENDA (TOTAL) DESC."
         FROM Vendas 
         WHERE strftime('%Y', "DATA (RECEBIMENTO PO)") = '{ano}';
     """
     df = executar_consulta(query)
-    # A função get_dados_mensais já usa "VALOR - VENDA (TOTAL) DESC." como padrão
     return get_dados_mensais(df.copy(), "DATA (RECEBIMENTO PO)")
 
 def calcular_pendentes(tipo: str, ano: int, mes_limite: int) -> tuple[int, float, dict]:
-    """Calcula BMs ou Relatórios pendentes para um ano e período específicos."""
+    """Calcula BMs ou Relatórios pendentes para atendimentos iniciados no ano de análise."""
     if mes_limite == 0:
         return 0, 0, {m: 0 for m in MESES_MAP.values()}
 
@@ -92,7 +88,7 @@ def calcular_pendentes(tipo: str, ano: int, mes_limite: int) -> tuple[int, float
         FROM Vendas
         WHERE ({data_ref_sql} IS NOT NULL AND {data_ref_sql} != '')
         AND ({data_vazia_sql} IS NULL OR {data_vazia_sql} = '')
-        AND strftime('%Y', {data_ref_sql}) = '{ano}';
+        AND strftime('%Y', "DATA (RECEBIMENTO PO)") = '{ano}';
     """
     df = executar_consulta(query)
     df[data_ref_pd] = pd.to_datetime(df[data_ref_pd], errors='coerce')
@@ -100,6 +96,7 @@ def calcular_pendentes(tipo: str, ano: int, mes_limite: int) -> tuple[int, float
     
     qtde_total = len(df_periodo)
     valor_total = df_periodo["VALOR - VENDA (TOTAL) DESC."].sum()
+    
     qtde_mensal = get_dados_mensais(df, data_ref_pd, 'contagem')
     return int(qtde_total), valor_total, qtde_mensal
 
@@ -218,13 +215,11 @@ def gerar_dashboard(ano_atual, mes_atual):
     print("-" * 30)
     
     print("Passo 1: Calculando indicadores...")
-    # Busca os dados mensais para o ano inteiro
     fat_mensal = calcular_faturamento_mensal(ano_atual)
     ven_mensal = calcular_vendas_mensal(ano_atual)
     fat_mensal_2024 = calcular_faturamento_mensal(ano_anterior)
     ven_mensal_2024 = calcular_vendas_mensal(ano_anterior)
 
-    # Calcula totais e médias com base nos dados mensais
     fat_total = sum(list(fat_mensal.values())[:mes_atual])
     ven_total = sum(list(ven_mensal.values())[:mes_atual])
 
@@ -312,3 +307,4 @@ if __name__ == "__main__":
     print("-" * 30)
     print("Processo Concluido!")
     print(f"Abra o arquivo '{NOME_OUTPUT_HTML}' para ver o resultado.")
+
