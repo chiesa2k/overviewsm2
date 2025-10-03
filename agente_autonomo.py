@@ -207,11 +207,11 @@ def gerar_dashboard(ano_atual, mes_atual):
     """Função principal que orquestra o cálculo e a criação do HTML."""
     agora = datetime.now()
     
-    mes_limite_comparacao = mes_atual - 1
+    mes_limite_analise = mes_atual - 1
     ano_anterior = ano_atual - 1
     
     print(f"Agente Autonomo Final iniciado.")
-    print(f"Ano de Analise: {ano_atual}, Mes de Exibicao: {mes_atual}, Mes de Comparacao e Graficos: {mes_limite_comparacao}")
+    print(f"Ano de Analise: {ano_atual}, Mes de Exibicao: {mes_atual}, Mes de Analise Consolidada: {mes_limite_analise}")
     print("-" * 30)
     
     print("Passo 1: Calculando indicadores...")
@@ -220,25 +220,33 @@ def gerar_dashboard(ano_atual, mes_atual):
     fat_mensal_2024 = calcular_faturamento_mensal(ano_anterior)
     ven_mensal_2024 = calcular_vendas_mensal(ano_anterior)
 
-    fat_total = sum(list(fat_mensal.values())[:mes_atual])
-    ven_total = sum(list(ven_mensal.values())[:mes_atual])
+    # --- LÓGICA DE CÁLCULO ATUALIZADA E SEPARADA ---
 
-    fat_total_comp = sum(list(fat_mensal.values())[:mes_limite_comparacao])
-    fat_total_2024_comp = sum(list(fat_mensal_2024.values())[:mes_limite_comparacao])
+    # 1. Total para EXIBIÇÃO: Soma todos os valores até o mês atual (incluindo o parcial)
+    fat_total_exibicao = sum(list(fat_mensal.values())[:mes_atual])
+    ven_total_exibicao = sum(list(ven_mensal.values())[:mes_atual])
 
-    ven_total_comp = sum(list(ven_mensal.values())[:mes_limite_comparacao])
-    ven_total_2024_comp = sum(list(ven_mensal_2024.values())[:mes_limite_comparacao])
+    # 2. Total para ANÁLISE: Soma os valores apenas dos meses fechados
+    fat_total_analise = sum(list(fat_mensal.values())[:mes_limite_analise])
+    ven_total_analise = sum(list(ven_mensal.values())[:mes_limite_analise])
+    
+    # 3. Totais para COMPARAÇÃO: Usam o período de análise (meses fechados)
+    fat_total_2024_comp = sum(list(fat_mensal_2024.values())[:mes_limite_analise])
+    ven_total_2024_comp = sum(list(ven_mensal_2024.values())[:mes_limite_analise])
 
-    fat_media_correta = fat_total_comp / mes_limite_comparacao if mes_limite_comparacao > 0 else 0
-    ven_media_correta = ven_total_comp / mes_limite_comparacao if mes_limite_comparacao > 0 else 0
+    # 4. Médias: São sempre baseadas no período de análise (meses fechados)
+    fat_media_correta = fat_total_analise / mes_limite_analise if mes_limite_analise > 0 else 0
+    ven_media_correta = ven_total_analise / mes_limite_analise if mes_limite_analise > 0 else 0
 
+    # Os pendentes usam o mês atual para o total, pois a pendência é "do dia".
     bm_qtde, bm_valor, bm_mensal = calcular_pendentes("bm", ano_atual, mes_atual)
     rel_qtde, rel_valor, rel_mensal = calcular_pendentes("relatorio", ano_atual, mes_atual)
 
-    variacao_faturamento = ((fat_total_comp - fat_total_2024_comp) / fat_total_2024_comp * 100) if fat_total_2024_comp > 0 else 0
+    # Variações: Usam os totais de comparação (meses fechados)
+    variacao_faturamento = ((fat_total_analise - fat_total_2024_comp) / fat_total_2024_comp * 100) if fat_total_2024_comp > 0 else 0
     variacao_faturamento_classe = "var-positive" if variacao_faturamento >= 0 else "var-negative"
     
-    variacao_vendas = ((ven_total_comp - ven_total_2024_comp) / ven_total_2024_comp * 100) if ven_total_2024_comp > 0 else 0
+    variacao_vendas = ((ven_total_analise - ven_total_2024_comp) / ven_total_2024_comp * 100) if ven_total_2024_comp > 0 else 0
     variacao_vendas_classe = "var-positive" if variacao_vendas >= 0 else "var-negative"
     
     print("\nPasso 2: Atualizando o arquivo do dashboard...")
@@ -247,13 +255,16 @@ def gerar_dashboard(ano_atual, mes_atual):
             html_final = f.read()
         
         dados_para_substituir = {
-            "FATURAMENTO_TOTAL": formatar_moeda(fat_total),
+            # O total exibido agora é o total acumulado até o mês atual.
+            "FATURAMENTO_TOTAL": formatar_moeda(fat_total_exibicao),
+            "VENDAS_TOTAL": formatar_moeda(ven_total_exibicao),
+
+            # A média e a variação continuam baseadas nos meses fechados.
             "FATURAMENTO_MEDIA": formatar_moeda(fat_media_correta),
             "FATURAMENTO_TOTAL_2024": formatar_moeda(fat_total_2024_comp),
             "FATURAMENTO_VARIACAO": f"{variacao_faturamento:+.2f}%".replace('.',','),
             "FATURAMENTO_VARIACAO_CLASSE": variacao_faturamento_classe,
             
-            "VENDAS_TOTAL": formatar_moeda(ven_total),
             "VENDAS_MEDIA": formatar_moeda(ven_media_correta),
             "VENDAS_TOTAL_2024": formatar_moeda(ven_total_2024_comp),
             "VENDAS_VARIACAO": f"{variacao_vendas:+.2f}%".replace('.',','),
@@ -270,6 +281,7 @@ def gerar_dashboard(ano_atual, mes_atual):
             "ANO_DE_ANALISE": str(ano_atual),
         }
 
+        # O preenchimento da lista mensal continua o mesmo, mostrando todos os dados disponíveis.
         for mes_str, val_mes in fat_mensal.items(): dados_para_substituir[f"FATURAMENTO_MENSAL_{mes_str}"] = formatar_moeda(val_mes)
         for mes_str, val_mes in ven_mensal.items(): dados_para_substituir[f"VENDAS_MENSAL_{mes_str}"] = formatar_moeda(val_mes)
         for mes_str, qtde_mes in bm_mensal.items(): dados_para_substituir[f"BM_PENDENTE_MENSAL_{mes_str}"] = f"{int(qtde_mes)} itens"
@@ -287,7 +299,8 @@ def gerar_dashboard(ano_atual, mes_atual):
             "RELATORIOS_PENDENTES_MENSAL": rel_mensal,
         }
         
-        script_graficos = gerar_script_graficos(dados_graficos, mes_limite_comparacao)
+        # Os gráficos continuam a usar o limite do mês fechado.
+        script_graficos = gerar_script_graficos(dados_graficos, mes_limite_analise)
         html_final = html_final.replace("{{GRAFICOS_SCRIPT}}", script_graficos)
 
         with open(NOME_OUTPUT_HTML, "w", encoding="utf-8") as f:
