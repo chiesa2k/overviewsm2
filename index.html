@@ -70,7 +70,7 @@
 
         <section class="data-card">
             <h2 class="card-title"><i data-lucide="shopping-cart" style="color: #16a34a;"></i>Vendas</h2>
-            <div class="total-value" style="color: #16a34a;">R$ 33.982.272,78</div>
+            <div class="total-value" style="color: #16a34a;">R$ 33.994.752,03</div>
             <div class="chart-container"><canvas id="vendasChart"></canvas></div>
             <div class="monthly-data">
                 <p data-month="1">JAN: <span>R$ 3.668.047,54</span></p>
@@ -82,7 +82,7 @@
                 <p data-month="7">JUL: <span>R$ 4.169.774,68</span></p>
                 <p data-month="8">AGO: <span>R$ 3.953.959,04</span></p>
                 <p data-month="9">SET: <span>R$ 1.855.348,33</span></p>
-                <p data-month="10">OUT: <span>R$ 858.592,35</span></p>
+                <p data-month="10">OUT: <span>R$ 871.071,60</span></p>
                 <p data-month="11">NOV: <span>R$ 58.878,15</span></p>
                 <p data-month="12">DEZ: <span>R$ 0,00</span></p>
                 <p class="summary-line">Média Mensal: <span class="font-semibold">R$ 3.680.408,94</span></p>
@@ -98,7 +98,7 @@
         <section class="data-card">
             <h2 class="card-title"><i data-lucide="alert-circle" style="color: #dc2626;"></i>BM Pendente</h2>
             <p class="card-subtitle-custom">Quantidade de Itens (2025)</p>
-            <div class="card-main-metric">74</div>
+            <div class="card-main-metric">69</div>
             <div class="chart-container"><canvas id="bmPendenteChart"></canvas></div>
             <div class="monthly-data">
                  <p data-month="1">JAN: <span>0 itens</span></p>
@@ -108,12 +108,12 @@
                 <p data-month="5">MAI: <span>2 itens</span></p>
                 <p data-month="6">JUN: <span>3 itens</span></p>
                 <p data-month="7">JUL: <span>2 itens</span></p>
-                <p data-month="8">AGO: <span>9 itens</span></p>
-                <p data-month="9">SET: <span>18 itens</span></p>
-                <p data-month="10">OUT: <span>36 itens</span></p>
+                <p data-month="8">AGO: <span>8 itens</span></p>
+                <p data-month="9">SET: <span>17 itens</span></p>
+                <p data-month="10">OUT: <span>33 itens</span></p>
                 <p data-month="11">NOV: <span>0 itens</span></p>
                 <p data-month="12">DEZ: <span>0 itens</span></p>
-                <p class="summary-line">Valor Total (Período): <span class="font-semibold pending-value">R$ 2.273.167,24</span></p>
+                <p class="summary-line">Valor Total (Período): <span class="font-semibold pending-value">R$ 2.019.079,24</span></p>
             </div>
         </section>
 
@@ -142,7 +142,7 @@
     </main>
 
     <footer class="mt-6 text-center text-sm text-gray-500"> 
-        Atualizado em: 27/10/2025 14:01. 
+        Atualizado em: 27/10/2025 15:01. 
     </footer>
 
     
@@ -197,7 +197,7 @@
                              {
                                 label: 'Vendas 2025',
                                 type: 'bar',
-                                data: [3668047.54, 5370652.437, 1655856.24, 5162238.39, 3719985.77, 3567818.005, 4169774.68, 3953959.04, 1855348.33, 858592.35, 58878.15, 0].slice(0, mesLimiteGrafico),
+                                data: [3668047.54, 5370652.437, 1655856.24, 5162238.39, 3719985.77, 3567818.005, 4169774.68, 3953959.04, 1855348.33, 871071.6, 58878.15, 0].slice(0, mesLimiteGrafico),
                                 backgroundColor: 'rgba(22, 163, 74, 0.6)'
                             },
                             {
@@ -214,7 +214,7 @@
                     options: baseChartOptions
                 });
 
-                new Chart(document.getElementById('bmPendenteChart'), { type: 'bar', data: { labels: chartLabels, datasets: [{ label: 'Itens', data: [0, 0, 1, 3, 2, 3, 2, 9, 18, 36, 0, 0].slice(0, mesLimiteGrafico), backgroundColor: 'rgba(220, 38, 38, 0.6)' }] }, options: integerChartOptions });
+                new Chart(document.getElementById('bmPendenteChart'), { type: 'bar', data: { labels: chartLabels, datasets: [{ label: 'Itens', data: [0, 0, 1, 3, 2, 3, 2, 8, 17, 33, 0, 0].slice(0, mesLimiteGrafico), backgroundColor: 'rgba(220, 38, 38, 0.6)' }] }, options: integerChartOptions });
                 new Chart(document.getElementById('relatoriosPendentesChart'), { type: 'bar', data: { labels: chartLabels, datasets: [{ label: 'Itens', data: [1, 0, 1, 1, 0, 0, 1, 2, 4, 6, 0, 0].slice(0, mesLimiteGrafico), backgroundColor: 'rgba(249, 115, 22, 0.6)' }] }, options: integerChartOptions });
             
             } catch (error) {
