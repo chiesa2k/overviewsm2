@@ -71,11 +71,9 @@ def calcular_vendas_mensal(ano: int) -> dict:
     df = executar_consulta(query)
     return get_dados_mensais(df.copy(), "DATA (RECEBIMENTO PO)")
 
-def calcular_pendentes(tipo: str, ano: int, mes_limite: int) -> tuple[int, float, dict]:
+def calcular_pendentes(tipo: str, ano: int) -> tuple[int, float, dict]:
     """Calcula BMs ou Relatórios pendentes para atendimentos iniciados no ano de análise."""
-    if mes_limite == 0:
-        return 0, 0, {m: 0 for m in MESES_MAP.values()}
-
+    
     if tipo == "bm":
         data_ref_pd, data_vazia_pd = 'DATA (ENVIO DOS RELATÓRIOS)', 'DATA (LIBERAÇÃO BM)'
     else: # relatorios
@@ -91,13 +89,16 @@ def calcular_pendentes(tipo: str, ano: int, mes_limite: int) -> tuple[int, float
         AND strftime('%Y', "DATA (RECEBIMENTO PO)") = '{ano}';
     """
     df = executar_consulta(query)
-    df[data_ref_pd] = pd.to_datetime(df[data_ref_pd], errors='coerce')
-    df_periodo = df[df[data_ref_pd].dt.month <= mes_limite]
     
-    qtde_total = len(df_periodo)
-    valor_total = df_periodo["VALOR - VENDA (TOTAL) DESC."].sum()
+    # --- LÓGICA DE CÁLCULO TOTAL CORRIGIDA ---
+    # O total de pendentes é a contagem de *todos* os itens encontrados pela query,
+    # não um subconjunto filtrado por mês. O filtro de mês foi removido.
+    qtde_total = len(df)
+    valor_total = df["VALOR - VENDA (TOTAL) DESC."].sum()
     
-    qtde_mensal = get_dados_mensais(df, data_ref_pd, 'contagem')
+    # O agrupamento mensal para o gráfico está correto.
+    qtde_mensal = get_dados_mensais(df.copy(), data_ref_pd, 'contagem')
+    
     return int(qtde_total), valor_total, qtde_mensal
 
 # --- 3. FASE 2: PREENCHIMENTO DO DASHBOARD ---
@@ -238,9 +239,9 @@ def gerar_dashboard(ano_atual, mes_atual):
     fat_media_correta = fat_total_analise / mes_limite_analise if mes_limite_analise > 0 else 0
     ven_media_correta = ven_total_analise / mes_limite_analise if mes_limite_analise > 0 else 0
 
-    # Os pendentes usam o mês atual para o total, pois a pendência é "do dia".
-    bm_qtde, bm_valor, bm_mensal = calcular_pendentes("bm", ano_atual, mes_atual)
-    rel_qtde, rel_valor, rel_mensal = calcular_pendentes("relatorio", ano_atual, mes_atual)
+    # 5. Pendentes: Usam o ano atual. O 'mes_limite' foi removido da chamada.
+    bm_qtde, bm_valor, bm_mensal = calcular_pendentes("bm", ano_atual)
+    rel_qtde, rel_valor, rel_mensal = calcular_pendentes("relatorio", ano_atual)
 
     # Variações: Usam os totais de comparação (meses fechados)
     variacao_faturamento = ((fat_total_analise - fat_total_2024_comp) / fat_total_2024_comp * 100) if fat_total_2024_comp > 0 else 0
@@ -320,4 +321,3 @@ if __name__ == "__main__":
     print("-" * 30)
     print("Processo Concluido!")
     print(f"Abra o arquivo '{NOME_OUTPUT_HTML}' para ver o resultado.")
-
