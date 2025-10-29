@@ -108,10 +108,17 @@ def get_dados_mensais(df: pd.DataFrame, coluna_data: str, tipo_agregacao: str = 
     """Helper para agrupar dados por mês, retornando um dicionário com 12 meses."""
     if df.empty or coluna_data not in df.columns:
         return {mes_str: 0 for mes_str in MESES_MAP.values()}
-    df[coluna_data] = pd.to_datetime(df[coluna_data], errors='coerce')
-    df.dropna(subset=[coluna_data], inplace=True)
+    # Garante que a coluna de data exista antes de tentar converter
+    if coluna_data in df.columns:
+        df[coluna_data] = pd.to_datetime(df[coluna_data], errors='coerce')
+        df.dropna(subset=[coluna_data], inplace=True)
+    else:
+        print(f"AVISO: A coluna de data '{coluna_data}' não foi encontrada para agrupamento mensal.")
+        return {mes_str: 0 for mes_str in MESES_MAP.values()} # Retorna zero se a coluna de data não existe
+
     if df.empty:
         return {mes_str: 0 for mes_str in MESES_MAP.values()}
+
     df['mes'] = df[coluna_data].dt.month
     if tipo_agregacao == 'valor':
         if coluna_valor not in df.columns:
@@ -120,7 +127,7 @@ def get_dados_mensais(df: pd.DataFrame, coluna_data: str, tipo_agregacao: str = 
         # Garante que a soma ocorra DEPOIS da limpeza, se aplicável fora da função
         dados_mensais = df.groupby('mes')[coluna_valor].sum()
     else: # contagem
-        dados_mensais = df.groupby('mes').size()
+        dados_mensais = df.groupby('mes').size() # Conta as linhas por mês
     return {MESES_MAP[mes_num]: dados_mensais.get(mes_num, 0) for mes_num in range(1, 13)}
 
 def calcular_faturamento_mensal(ano: int) -> dict:
@@ -160,26 +167,59 @@ def calcular_vendas_mensal(ano: int) -> dict:
 
 def calcular_pendentes(tipo: str, ano: int) -> tuple[int, float, dict]:
     """Calcula BMs ou Relatórios pendentes para atendimentos iniciados no ano de análise."""
+
+    # Coluna de valor padrão (usada para soma)
+    coluna_valor_total = "VALOR - VENDA (TOTAL) DESC." # Coluna AQ (valor total)
+
     if tipo == "bm":
-        data_ref_pd, data_vazia_pd = 'DATA (ENVIO DOS RELATÓRIOS)', 'DATA (LIBERAÇÃO BM)'
-    else: # relatorios
+        # --- LÓGICA BM PENDENTE ATUALIZADA ---
+        coluna_status = '"ATENDIMENTO (ANDAMENTO)"' # Coluna A
+        status_pendente = "'Liberação BM'"
+        coluna_data_ref_ano_mes = '"DATA (INÍCIO ATENDIMENTO)"' # Coluna AE (data base)
+        
+        query = f"""
+            SELECT {coluna_valor_total}, {coluna_data_ref_ano_mes}
+            FROM Vendas
+            WHERE {coluna_status} = {status_pendente}
+            AND strftime('%Y', {coluna_data_ref_ano_mes}) = '{ano}'; 
+        """
+        # Define a coluna de data a ser usada no Pandas e para agrupamento mensal
+        coluna_data_pd = "DATA (INÍCIO ATENDIMENTO)"
+
+    elif tipo == "relatorio":
+        # Lógica original para Relatórios Pendentes
         data_ref_pd, data_vazia_pd = 'DATA (FINAL ATENDIMENTO)', 'DATA (ENVIO DOS RELATÓRIOS)'
-    data_ref_sql, data_vazia_sql = f'"{data_ref_pd}"', f'"{data_vazia_pd}"'
-    coluna_valor_pendentes = "VALOR - VENDA (TOTAL) DESC."
-    query = f"""
-        SELECT "{coluna_valor_pendentes}", {data_ref_sql}
-        FROM Vendas
-        WHERE ({data_ref_sql} IS NOT NULL AND {data_ref_sql} != '')
-        AND ({data_vazia_sql} IS NULL OR {data_vazia_sql} = '')
-        AND strftime('%Y', "DATA (RECEBIMENTO PO)") = '{ano}';
-    """
+        data_ref_sql, data_vazia_sql = f'"{data_ref_pd}"', f'"{data_vazia_pd}"'
+        
+        query = f"""
+            SELECT "{coluna_valor_total}", {data_ref_sql}
+            FROM Vendas
+            WHERE ({data_ref_sql} IS NOT NULL AND {data_ref_sql} != '')
+            AND ({data_vazia_sql} IS NULL OR {data_vazia_sql} = '')
+            AND strftime('%Y', "DATA (RECEBIMENTO PO)") = '{ano}'; -- Mantém filtro de ano pelo PO
+        """
+        # Define a coluna de data a ser usada no Pandas e para agrupamento mensal
+        coluna_data_pd = "DATA (FINAL ATENDIMENTO)"
+    else:
+        print(f"ERRO: Tipo de pendente desconhecido '{tipo}'")
+        return 0, 0.0, {m: 0 for m in MESES_MAP.values()}
+
     df = executar_consulta(query)
-    if coluna_valor_pendentes in df.columns:
-         # Aplica a limpeza robusta
-        df[coluna_valor_pendentes] = limpar_valor_monetario(df[coluna_valor_pendentes])
+    
+    # Aplica a limpeza robusta na coluna de valor total
+    if coluna_valor_total in df.columns:
+        df[coluna_valor_total] = limpar_valor_monetario(df[coluna_valor_total])
+    else:
+         print(f"AVISO: Coluna de valor '{coluna_valor_total}' não encontrada para pendentes.")
+         # Define a coluna como 0 para evitar erro na soma
+         df[coluna_valor_total] = 0.0
+
     qtde_total = len(df)
-    valor_total = df[coluna_valor_pendentes].sum()
-    qtde_mensal = get_dados_mensais(df.copy(), data_ref_pd, 'contagem', coluna_valor=coluna_valor_pendentes)
+    valor_total = df[coluna_valor_total].sum()
+    
+    # Usa a coluna_data_pd definida para agrupar mensalmente pela contagem
+    qtde_mensal = get_dados_mensais(df.copy(), coluna_data_pd, 'contagem', coluna_valor=coluna_valor_total)
+    
     return int(qtde_total), valor_total, qtde_mensal
 
 # --- 3. FASE 2: PREENCHIMENTO DO DASHBOARD ---

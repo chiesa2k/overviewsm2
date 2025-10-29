@@ -98,22 +98,22 @@
         <section class="data-card">
             <h2 class="card-title"><i data-lucide="alert-circle" style="color: #dc2626;"></i>BM Pendente</h2>
             <p class="card-subtitle-custom">Quantidade de Itens (2025)</p>
-            <div class="card-main-metric">68</div>
+            <div class="card-main-metric">0</div>
             <div class="chart-container"><canvas id="bmPendenteChart"></canvas></div>
             <div class="monthly-data">
                  <p data-month="1">JAN: <span>0 itens</span></p>
                 <p data-month="2">FEV: <span>0 itens</span></p>
                 <p data-month="3">MAR: <span>0 itens</span></p>
-                <p data-month="4">ABR: <span>3 itens</span></p>
-                <p data-month="5">MAI: <span>2 itens</span></p>
-                <p data-month="6">JUN: <span>3 itens</span></p>
-                <p data-month="7">JUL: <span>2 itens</span></p>
-                <p data-month="8">AGO: <span>8 itens</span></p>
-                <p data-month="9">SET: <span>18 itens</span></p>
-                <p data-month="10">OUT: <span>32 itens</span></p>
+                <p data-month="4">ABR: <span>0 itens</span></p>
+                <p data-month="5">MAI: <span>0 itens</span></p>
+                <p data-month="6">JUN: <span>0 itens</span></p>
+                <p data-month="7">JUL: <span>0 itens</span></p>
+                <p data-month="8">AGO: <span>0 itens</span></p>
+                <p data-month="9">SET: <span>0 itens</span></p>
+                <p data-month="10">OUT: <span>0 itens</span></p>
                 <p data-month="11">NOV: <span>0 itens</span></p>
                 <p data-month="12">DEZ: <span>0 itens</span></p>
-                <p class="summary-line">Valor Total (Período): <span class="font-semibold pending-value">R$ 1.953.147,24</span></p>
+                <p class="summary-line">Valor Total (Período): <span class="font-semibold pending-value">R$ 0,00</span></p>
             </div>
         </section>
 
@@ -142,7 +142,7 @@
     </main>
 
     <footer class="mt-6 text-center text-sm text-gray-500"> 
-        Atualizado em: 29/10/2025 16:01. 
+        Atualizado em: 29/10/2025 16:20. 
     </footer>
 
     
@@ -214,7 +214,7 @@
                     options: baseChartOptions
                 });
 
-                new Chart(document.getElementById('bmPendenteChart'), { type: 'bar', data: { labels: chartLabels, datasets: [{ label: 'Itens', data: [0, 0, 0, 3, 2, 3, 2, 8, 18, 32, 0, 0].slice(0, mesLimiteGrafico), backgroundColor: 'rgba(220, 38, 38, 0.6)' }] }, options: integerChartOptions });
+                new Chart(document.getElementById('bmPendenteChart'), { type: 'bar', data: { labels: chartLabels, datasets: [{ label: 'Itens', data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0].slice(0, mesLimiteGrafico), backgroundColor: 'rgba(220, 38, 38, 0.6)' }] }, options: integerChartOptions });
                 new Chart(document.getElementById('relatoriosPendentesChart'), { type: 'bar', data: { labels: chartLabels, datasets: [{ label: 'Itens', data: [1, 0, 1, 1, 0, 0, 1, 2, 4, 8, 0, 0].slice(0, mesLimiteGrafico), backgroundColor: 'rgba(249, 115, 22, 0.6)' }] }, options: integerChartOptions });
             
             } catch (error) {
