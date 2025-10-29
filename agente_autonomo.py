@@ -6,6 +6,7 @@ from typing import Dict, List, Tuple
 from datetime import datetime
 import json
 import numpy as np
+import re # Importar a biblioteca re para limpeza mais robusta
 
 # Carrega as variáveis de ambiente
 load_dotenv()
@@ -17,6 +18,23 @@ NOME_OUTPUT_HTML = "index.html"
 MESES_MAP = {1: 'JAN', 2: 'FEV', 3: 'MAR', 4: 'ABR', 5: 'MAI', 6: 'JUN', 7: 'JUL', 8: 'AGO', 9: 'SET', 10: 'OUT', 11: 'NOV', 12: 'DEZ'}
 
 # --- 2. FERRAMENTAS DE CÁLCULO ---
+
+def limpar_valor_monetario(series: pd.Series) -> pd.Series:
+    """Converte uma Series de texto (moeda brasileira) para numérico."""
+    if series is None:
+        return pd.Series([0.0] * len(series))
+        
+    # 1. Converte para string
+    cleaned_series = series.astype(str)
+    # 2. Remove 'R$', espaços em branco no início/fim e espaços extras
+    cleaned_series = cleaned_series.str.replace('R$', '', regex=False).str.strip()
+    # 3. Remove pontos (separadores de milhar)
+    cleaned_series = cleaned_series.str.replace('.', '', regex=False)
+    # 4. Substitui vírgula (separador decimal) por ponto
+    cleaned_series = cleaned_series.str.replace(',', '.', regex=False)
+    # 5. Tenta converter para numérico, tratando erros como NaN e depois preenche com 0
+    numeric_series = pd.to_numeric(cleaned_series, errors='coerce').fillna(0)
+    return numeric_series
 
 def executar_consulta(query: str) -> pd.DataFrame:
     """Executa uma consulta e retorna um DataFrame do Pandas."""
@@ -44,6 +62,7 @@ def get_dados_mensais(df: pd.DataFrame, coluna_data: str, tipo_agregacao: str = 
         if coluna_valor not in df.columns:
             print(f"AVISO: A coluna de valor '{coluna_valor}' não foi encontrada. O cálculo será zerado.")
             return {mes_str: 0 for mes_str in MESES_MAP.values()}
+        # Garante que a soma ocorra DEPOIS da limpeza, se aplicável fora da função
         dados_mensais = df.groupby('mes')[coluna_valor].sum()
     else: # contagem
         dados_mensais = df.groupby('mes').size()
@@ -62,10 +81,8 @@ def calcular_faturamento_mensal(ano: int) -> dict:
     """
     df = executar_consulta(query)
     if coluna_valor_faturamento in df.columns:
-        df[coluna_valor_faturamento] = pd.to_numeric(
-            df[coluna_valor_faturamento].astype(str).str.replace('R$', '', regex=False).str.replace('.', '', regex=False).str.replace(',', '.', regex=False),
-            errors='coerce'
-        ).fillna(0)
+        # Aplica a limpeza robusta
+        df[coluna_valor_faturamento] = limpar_valor_monetario(df[coluna_valor_faturamento])
     else:
         print(f"ERRO CRÍTICO: A coluna de faturamento '{coluna_valor_faturamento}' não foi encontrada.")
         return {mes_str: 0 for mes_str in MESES_MAP.values()}
@@ -82,10 +99,8 @@ def calcular_vendas_mensal(ano: int) -> dict:
     """
     df = executar_consulta(query)
     if coluna_valor_vendas in df.columns:
-        df[coluna_valor_vendas] = pd.to_numeric(
-            df[coluna_valor_vendas].astype(str).str.replace('R$', '', regex=False).str.replace('.', '', regex=False).str.replace(',', '.', regex=False),
-            errors='coerce'
-        ).fillna(0)
+         # Aplica a limpeza robusta
+        df[coluna_valor_vendas] = limpar_valor_monetario(df[coluna_valor_vendas])
     return get_dados_mensais(df.copy(), coluna_data_vendas, coluna_valor=coluna_valor_vendas)
 
 def calcular_pendentes(tipo: str, ano: int) -> tuple[int, float, dict]:
@@ -105,10 +120,8 @@ def calcular_pendentes(tipo: str, ano: int) -> tuple[int, float, dict]:
     """
     df = executar_consulta(query)
     if coluna_valor_pendentes in df.columns:
-        df[coluna_valor_pendentes] = pd.to_numeric(
-            df[coluna_valor_pendentes].astype(str).str.replace('R$', '', regex=False).str.replace('.', '', regex=False).str.replace(',', '.', regex=False),
-            errors='coerce'
-        ).fillna(0)
+         # Aplica a limpeza robusta
+        df[coluna_valor_pendentes] = limpar_valor_monetario(df[coluna_valor_pendentes])
     qtde_total = len(df)
     valor_total = df[coluna_valor_pendentes].sum()
     qtde_mensal = get_dados_mensais(df.copy(), data_ref_pd, 'contagem', coluna_valor=coluna_valor_pendentes)
@@ -293,8 +306,7 @@ def gerar_dashboard(ano_atual, mes_atual):
         }
         
         script_graficos = gerar_script_graficos(dados_graficos, mes_limite_analise)
-        # --- CORREÇÃO DO ERRO DE DIGITAÇÃO APLICADA AQUI ---
-        html_final = html_final.replace("{{GRAFICOS_SCRIPT}}", script_graficos) # Estava script_grafios
+        html_final = html_final.replace("{{GRAFICOS_SCRIPT}}", script_graficos) 
 
         with open(NOME_OUTPUT_HTML, "w", encoding="utf-8") as f:
             f.write(html_final)
@@ -313,4 +325,3 @@ if __name__ == "__main__":
     print("-" * 30)
     print("Processo Concluido!")
     print(f"Abra o arquivo '{NOME_OUTPUT_HTML}' para ver o resultado.")
-
