@@ -51,11 +51,8 @@ def get_dados_mensais(df: pd.DataFrame, coluna_data: str, tipo_agregacao: str = 
 
 def calcular_faturamento_mensal(ano: int) -> dict:
     """Calcula o faturamento mensal (soma simples) para um ano inteiro, com limpeza de dados."""
-    
-    # Define as colunas (AW e BB)
     coluna_data_faturamento = "DATA (FATURAMENTO)"
     coluna_valor_faturamento = "VALOR - VENDA (TOTAL) DESC."
-
     query = f"""
         SELECT 
             "{coluna_data_faturamento}", 
@@ -64,9 +61,6 @@ def calcular_faturamento_mensal(ano: int) -> dict:
         WHERE strftime('%Y', "{coluna_data_faturamento}") = '{ano}';
     """
     df = executar_consulta(query)
-    
-    # --- ETAPA DE LIMPEZA FORÇADA ADICIONADA ---
-    # Garante que a coluna de valor (AW) seja tratada como número antes do cálculo.
     if coluna_valor_faturamento in df.columns:
         df[coluna_valor_faturamento] = pd.to_numeric(
             df[coluna_valor_faturamento].astype(str).str.replace('R$', '', regex=False).str.replace('.', '', regex=False).str.replace(',', '.', regex=False),
@@ -75,40 +69,33 @@ def calcular_faturamento_mensal(ano: int) -> dict:
     else:
         print(f"ERRO CRÍTICO: A coluna de faturamento '{coluna_valor_faturamento}' não foi encontrada.")
         return {mes_str: 0 for mes_str in MESES_MAP.values()}
-
-    # A chamada agora usa a coluna de valor já limpa e o nome correto.
     return get_dados_mensais(df.copy(), coluna_data_faturamento, tipo_agregacao='valor', coluna_valor=coluna_valor_faturamento)
 
 def calcular_vendas_mensal(ano: int) -> dict:
     """Calcula as vendas mensais para um ano inteiro."""
+    coluna_data_vendas = "DATA (RECEBIMENTO PO)"
+    coluna_valor_vendas = "VALOR - VENDA (TOTAL) DESC."
     query = f"""
-        SELECT "DATA (RECEBIMENTO PO)", "VALOR - VENDA (TOTAL) DESC."
+        SELECT "{coluna_data_vendas}", "{coluna_valor_vendas}"
         FROM Vendas 
-        WHERE strftime('%Y', "DATA (RECEBIMENTO PO)") = '{ano}';
+        WHERE strftime('%Y', "{coluna_data_vendas}") = '{ano}';
     """
     df = executar_consulta(query)
-    
-    # --- ADICIONADA LIMPEZA PARA VENDAS TAMBÉM (BOA PRÁTICA) ---
-    coluna_valor_vendas = "VALOR - VENDA (TOTAL) DESC."
     if coluna_valor_vendas in df.columns:
         df[coluna_valor_vendas] = pd.to_numeric(
             df[coluna_valor_vendas].astype(str).str.replace('R$', '', regex=False).str.replace('.', '', regex=False).str.replace(',', '.', regex=False),
             errors='coerce'
         ).fillna(0)
-    
-    return get_dados_mensais(df.copy(), "DATA (RECEBIMENTO PO)", coluna_valor=coluna_valor_vendas)
+    return get_dados_mensais(df.copy(), coluna_data_vendas, coluna_valor=coluna_valor_vendas)
 
 def calcular_pendentes(tipo: str, ano: int) -> tuple[int, float, dict]:
     """Calcula BMs ou Relatórios pendentes para atendimentos iniciados no ano de análise."""
-    
     if tipo == "bm":
         data_ref_pd, data_vazia_pd = 'DATA (ENVIO DOS RELATÓRIOS)', 'DATA (LIBERAÇÃO BM)'
     else: # relatorios
         data_ref_pd, data_vazia_pd = 'DATA (FINAL ATENDIMENTO)', 'DATA (ENVIO DOS RELATÓRIOS)'
-    
     data_ref_sql, data_vazia_sql = f'"{data_ref_pd}"', f'"{data_vazia_pd}"'
     coluna_valor_pendentes = "VALOR - VENDA (TOTAL) DESC."
-    
     query = f"""
         SELECT "{coluna_valor_pendentes}", {data_ref_sql}
         FROM Vendas
@@ -117,19 +104,14 @@ def calcular_pendentes(tipo: str, ano: int) -> tuple[int, float, dict]:
         AND strftime('%Y', "DATA (RECEBIMENTO PO)") = '{ano}';
     """
     df = executar_consulta(query)
-    
-    # --- ADICIONADA LIMPEZA PARA PENDENTES TAMBÉM (BOA PRÁTICA) ---
     if coluna_valor_pendentes in df.columns:
         df[coluna_valor_pendentes] = pd.to_numeric(
             df[coluna_valor_pendentes].astype(str).str.replace('R$', '', regex=False).str.replace('.', '', regex=False).str.replace(',', '.', regex=False),
             errors='coerce'
         ).fillna(0)
-
     qtde_total = len(df)
     valor_total = df[coluna_valor_pendentes].sum()
-    
     qtde_mensal = get_dados_mensais(df.copy(), data_ref_pd, 'contagem', coluna_valor=coluna_valor_pendentes)
-    
     return int(qtde_total), valor_total, qtde_mensal
 
 # --- 3. FASE 2: PREENCHIMENTO DO DASHBOARD ---
@@ -252,32 +234,18 @@ def gerar_dashboard(ano_atual, mes_atual):
     fat_mensal_2024 = calcular_faturamento_mensal(ano_anterior)
     ven_mensal_2024 = calcular_vendas_mensal(ano_anterior)
 
-    # --- LÓGICA DE CÁLCULO ATUALIZADA E SEPARADA ---
-
-    # 1. Total para EXIBIÇÃO: Soma todos os valores até o mês atual (incluindo o parcial)
     fat_total_exibicao = sum(list(fat_mensal.values())[:mes_atual])
     ven_total_exibicao = sum(list(ven_mensal.values())[:mes_atual])
-
-    # 2. Total para ANÁLISE: Soma os valores apenas dos meses fechados
     fat_total_analise = sum(list(fat_mensal.values())[:mes_limite_analise])
     ven_total_analise = sum(list(ven_mensal.values())[:mes_limite_analise])
-    
-    # 3. Totais para COMPARAÇÃO: Usam o período de análise (meses fechados)
     fat_total_2024_comp = sum(list(fat_mensal_2024.values())[:mes_limite_analise])
     ven_total_2024_comp = sum(list(ven_mensal_2024.values())[:mes_limite_analise])
-
-    # 4. Médias: São sempre baseadas no período de análise (meses fechados)
     fat_media_correta = fat_total_analise / mes_limite_analise if mes_limite_analise > 0 else 0
     ven_media_correta = ven_total_analise / mes_limite_analise if mes_limite_analise > 0 else 0
-
-    # 5. Pendentes: Usam o ano atual.
     bm_qtde, bm_valor, bm_mensal = calcular_pendentes("bm", ano_atual)
     rel_qtde, rel_valor, rel_mensal = calcular_pendentes("relatorio", ano_atual)
-
-    # Variações: Usam os totais de comparação (meses fechados)
     variacao_faturamento = ((fat_total_analise - fat_total_2024_comp) / fat_total_2024_comp * 100) if fat_total_2024_comp > 0 else 0
     variacao_faturamento_classe = "var-positive" if variacao_faturamento >= 0 else "var-negative"
-    
     variacao_vendas = ((ven_total_analise - ven_total_2024_comp) / ven_total_2024_comp * 100) if ven_total_2024_comp > 0 else 0
     variacao_vendas_classe = "var-positive" if variacao_vendas >= 0 else "var-negative"
     
@@ -287,33 +255,26 @@ def gerar_dashboard(ano_atual, mes_atual):
             html_final = f.read()
         
         dados_para_substituir = {
-            # O total exibido agora é o total acumulado até o mês atual.
             "FATURAMENTO_TOTAL": formatar_moeda(fat_total_exibicao),
             "VENDAS_TOTAL": formatar_moeda(ven_total_exibicao),
-
-            # A média e a variação continuam baseadas nos meses fechados.
             "FATURAMENTO_MEDIA": formatar_moeda(fat_media_correta),
             "FATURAMENTO_TOTAL_2024": formatar_moeda(fat_total_2024_comp),
             "FATURAMENTO_VARIACAO": f"{variacao_faturamento:+.2f}%".replace('.',','),
             "FATURAMENTO_VARIACAO_CLASSE": variacao_faturamento_classe,
-            
             "VENDAS_MEDIA": formatar_moeda(ven_media_correta),
             "VENDAS_TOTAL_2024": formatar_moeda(ven_total_2024_comp),
             "VENDAS_VARIACAO": f"{variacao_vendas:+.2f}%".replace('.',','),
             "VENDAS_VARIACAO_CLASSE": variacao_vendas_classe,
-
             "BM_PENDENTE_QTDE_TOTAL": str(bm_qtde),
             "BM_PENDENTE_VALOR_TOTAL": formatar_moeda(bm_valor),
             "RELATORIOS_PENDENTES_QTDE_TOTAL": str(rel_qtde),
             "RELATORIOS_PENDENTES_VALOR_TOTAL": formatar_moeda(rel_valor),
-            
             "DATA_ATUALIZACAO": agora.strftime("%d/%m/%Y %H:%M"),
             "MES_ATUAL": str(mes_atual),
             "MES_ATUAL_NOME": MESES_MAP.get(mes_atual, ''),
             "ANO_DE_ANALISE": str(ano_atual),
         }
 
-        # O preenchimento da lista mensal continua o mesmo, mostrando todos os dados disponíveis.
         for mes_str, val_mes in fat_mensal.items(): dados_para_substituir[f"FATURAMENTO_MENSAL_{mes_str}"] = formatar_moeda(val_mes)
         for mes_str, val_mes in ven_mensal.items(): dados_para_substituir[f"VENDAS_MENSAL_{mes_str}"] = formatar_moeda(val_mes)
         for mes_str, qtde_mes in bm_mensal.items(): dados_para_substituir[f"BM_PENDENTE_MENSAL_{mes_str}"] = f"{int(qtde_mes)} itens"
@@ -331,9 +292,9 @@ def gerar_dashboard(ano_atual, mes_atual):
             "RELATORIOS_PENDENTES_MENSAL": rel_mensal,
         }
         
-        # Os gráficos continuam a usar o limite do mês fechado.
         script_graficos = gerar_script_graficos(dados_graficos, mes_limite_analise)
-        html_final = html_final.replace("{{GRAFICOS_SCRIPT}}", script_grafios)
+        # --- CORREÇÃO DO ERRO DE DIGITAÇÃO APLICADA AQUI ---
+        html_final = html_final.replace("{{GRAFICOS_SCRIPT}}", script_graficos) # Estava script_grafios
 
         with open(NOME_OUTPUT_HTML, "w", encoding="utf-8") as f:
             f.write(html_final)
