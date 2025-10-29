@@ -20,20 +20,75 @@ MESES_MAP = {1: 'JAN', 2: 'FEV', 3: 'MAR', 4: 'ABR', 5: 'MAI', 6: 'JUN', 7: 'JUL
 # --- 2. FERRAMENTAS DE CÁLCULO ---
 
 def limpar_valor_monetario(series: pd.Series) -> pd.Series:
-    """Converte uma Series de texto (moeda brasileira) para numérico."""
+    """Converte uma Series de texto (moeda brasileira) para numérico de forma robusta."""
     if series is None:
-        return pd.Series([0.0] * len(series))
-        
-    # 1. Converte para string
+         # Retorna uma Series vazia ou com zeros, mantendo o índice se possível
+         return pd.Series([0.0] * len(series), index=series.index if series is not None else None)
+
+    # Garantir que é string
     cleaned_series = series.astype(str)
-    # 2. Remove 'R$', espaços em branco no início/fim e espaços extras
-    cleaned_series = cleaned_series.str.replace('R$', '', regex=False).str.strip()
-    # 3. Remove pontos (separadores de milhar)
-    cleaned_series = cleaned_series.str.replace('.', '', regex=False)
-    # 4. Substitui vírgula (separador decimal) por ponto
-    cleaned_series = cleaned_series.str.replace(',', '.', regex=False)
-    # 5. Tenta converter para numérico, tratando erros como NaN e depois preenche com 0
-    numeric_series = pd.to_numeric(cleaned_series, errors='coerce').fillna(0)
+
+    # Função auxiliar para limpar cada valor individualmente
+    def clean_value(value):
+        if pd.isna(value):
+            return 0.0
+        text = str(value).replace('R$', '').strip()
+        if not text:
+            return 0.0
+
+        # Encontrar a posição do último separador decimal (vírgula ou ponto)
+        last_comma = text.rfind(',')
+        last_dot = text.rfind('.')
+
+        # Determinar qual é o separador decimal real (o último que aparece)
+        decimal_separator_pos = max(last_comma, last_dot)
+        decimal_separator = ''
+        if decimal_separator_pos != -1:
+            decimal_separator = text[decimal_separator_pos]
+
+        # Lógica de limpeza baseada no separador encontrado
+        if decimal_separator == ',':
+            # Se a vírgula é o último separador, remover pontos e substituir vírgula por ponto
+            cleaned_text = text.replace('.', '').replace(',', '.')
+        elif decimal_separator == '.':
+             # Se o ponto é o último separador, verificar se há vírgulas antes (indicando formato europeu?)
+             # Por segurança, removeremos vírgulas (assumindo que são milhares)
+             cleaned_text = text.replace(',', '')
+             # O ponto já está na posição correta
+        else:
+            # Se não há separador decimal, remover todos os não-dígitos
+             cleaned_text = re.sub(r'[^\d]', '', text)
+
+        # Remover quaisquer caracteres não numéricos restantes (exceto o ponto decimal)
+        # Permite apenas dígitos e um único ponto decimal
+        cleaned_text = re.sub(r'[^\d.]', '', cleaned_text)
+        # Lidar com múltiplos pontos (manter apenas o primeiro como decimal, remover os outros)
+        parts = cleaned_text.split('.')
+        if len(parts) > 2:
+            cleaned_text = parts[0] + '.' + "".join(parts[1:])
+        elif len(parts) == 2 and not parts[0] and parts[1]: # Caso como ".50"
+             cleaned_text = "0." + parts[1]
+
+
+        # Converter para numérico, tratando erros
+        try:
+            # Handle empty string after cleaning or just "."
+            if not cleaned_text or cleaned_text == '.':
+                 return 0.0
+            return float(cleaned_text)
+        except ValueError:
+            # Se ainda assim falhar, tenta remover tudo exceto dígitos e converter
+            just_digits = re.sub(r'[^\d]', '', str(value))
+            if just_digits:
+                 try:
+                      # Pode ser um número inteiro grande lido incorretamente
+                      return float(just_digits)
+                 except ValueError:
+                      return 0.0 # Falha final
+            return 0.0 # Retorna 0 se a conversão falhar
+
+    # Aplicar a função de limpeza a cada elemento da Series
+    numeric_series = cleaned_series.apply(clean_value)
     return numeric_series
 
 def executar_consulta(query: str) -> pd.DataFrame:
@@ -325,3 +380,4 @@ if __name__ == "__main__":
     print("-" * 30)
     print("Processo Concluido!")
     print(f"Abra o arquivo '{NOME_OUTPUT_HTML}' para ver o resultado.")
+
