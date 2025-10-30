@@ -22,78 +22,42 @@ MESES_MAP = {1: 'JAN', 2: 'FEV', 3: 'MAR', 4: 'ABR', 5: 'MAI', 6: 'JUN', 7: 'JUL
 def limpar_valor_monetario(series: pd.Series) -> pd.Series:
     """Converte uma Series de texto (moeda brasileira) para numérico de forma robusta."""
     if series is None:
-         # Retorna uma Series vazia ou com zeros, mantendo o índice se possível
          return pd.Series([0.0] * len(series), index=series.index if series is not None else None)
-
-    # Garantir que é string
     cleaned_series = series.astype(str)
-
-    # Função auxiliar para limpar cada valor individualmente
     def clean_value(value):
-        if pd.isna(value):
-            return 0.0
+        if pd.isna(value): return 0.0
         text = str(value).replace('R$', '').strip()
-        if not text:
-            return 0.0
-
-        # Encontrar a posição do último separador decimal (vírgula ou ponto)
+        if not text: return 0.0
         last_comma = text.rfind(',')
         last_dot = text.rfind('.')
-
-        # Determinar qual é o separador decimal real (o último que aparece)
         decimal_separator_pos = max(last_comma, last_dot)
         decimal_separator = ''
-        if decimal_separator_pos != -1:
-            decimal_separator = text[decimal_separator_pos]
-
-        # Lógica de limpeza baseada no separador encontrado
+        if decimal_separator_pos != -1: decimal_separator = text[decimal_separator_pos]
         if decimal_separator == ',':
-            # Se a vírgula é o último separador, remover pontos e substituir vírgula por ponto
             cleaned_text = text.replace('.', '').replace(',', '.')
         elif decimal_separator == '.':
-             # Se o ponto é o último separador, verificar se há vírgulas antes (indicando formato europeu?)
-             # Por segurança, removeremos vírgulas (assumindo que são milhares)
              cleaned_text = text.replace(',', '')
-             # O ponto já está na posição correta
         else:
-            # Se não há separador decimal, remover todos os não-dígitos
              cleaned_text = re.sub(r'[^\d]', '', text)
-
-        # Remover quaisquer caracteres não numéricos restantes (exceto o ponto decimal)
-        # Permite apenas dígitos e um único ponto decimal
         cleaned_text = re.sub(r'[^\d.]', '', cleaned_text)
-        # Lidar com múltiplos pontos (manter apenas o primeiro como decimal, remover os outros)
         parts = cleaned_text.split('.')
-        if len(parts) > 2:
-            cleaned_text = parts[0] + '.' + "".join(parts[1:])
-        elif len(parts) == 2 and not parts[0] and parts[1]: # Caso como ".50"
-             cleaned_text = "0." + parts[1]
-
-
-        # Converter para numérico, tratando erros
+        if len(parts) > 2: cleaned_text = parts[0] + '.' + "".join(parts[1:])
+        elif len(parts) == 2 and not parts[0] and parts[1]: cleaned_text = "0." + parts[1]
         try:
-            # Handle empty string after cleaning or just "."
-            if not cleaned_text or cleaned_text == '.':
-                 return 0.0
+            if not cleaned_text or cleaned_text == '.': return 0.0
             return float(cleaned_text)
         except ValueError:
-            # Se ainda assim falhar, tenta remover tudo exceto dígitos e converter
             just_digits = re.sub(r'[^\d]', '', str(value))
             if just_digits:
-                 try:
-                      # Pode ser um número inteiro grande lido incorretamente
-                      return float(just_digits)
-                 except ValueError:
-                      return 0.0 # Falha final
-            return 0.0 # Retorna 0 se a conversão falhar
-
-    # Aplicar a função de limpeza a cada elemento da Series
+                 try: return float(just_digits)
+                 except ValueError: return 0.0
+            return 0.0
     numeric_series = cleaned_series.apply(clean_value)
     return numeric_series
 
 def executar_consulta(query: str) -> pd.DataFrame:
     """Executa uma consulta e retorna um DataFrame do Pandas."""
-    print(f"-- Executando SQL: {query[:90]}...")
+    print(f"-- Executando SQL: {query[:150]}...") # Aumentado limite para ver mais da query
     conexao = sqlite3.connect(NOME_BANCO_DADOS)
     try:
         df = pd.read_sql_query(query, conexao)
@@ -106,28 +70,46 @@ def executar_consulta(query: str) -> pd.DataFrame:
 
 def get_dados_mensais(df: pd.DataFrame, coluna_data: str, tipo_agregacao: str = 'valor', coluna_valor: str = "VALOR - VENDA (TOTAL) DESC.") -> dict:
     """Helper para agrupar dados por mês, retornando um dicionário com 12 meses."""
-    if df.empty or coluna_data not in df.columns:
-        return {mes_str: 0 for mes_str in MESES_MAP.values()}
-    # Garante que a coluna de data exista antes de tentar converter
-    if coluna_data in df.columns:
-        df[coluna_data] = pd.to_datetime(df[coluna_data], errors='coerce')
-        df.dropna(subset=[coluna_data], inplace=True)
-    else:
-        print(f"AVISO: A coluna de data '{coluna_data}' não foi encontrada para agrupamento mensal.")
-        return {mes_str: 0 for mes_str in MESES_MAP.values()} # Retorna zero se a coluna de data não existe
-
-    if df.empty:
+    if df.empty: # Verificação inicial se o df já está vazio
+        # print(f"DEBUG: DataFrame vazio ao entrar em get_dados_mensais para coluna '{coluna_data}'.")
         return {mes_str: 0 for mes_str in MESES_MAP.values()}
 
-    df['mes'] = df[coluna_data].dt.month
+    if coluna_data not in df.columns:
+        print(f"DEBUG: Coluna de data '{coluna_data}' não encontrada no DataFrame para get_dados_mensais.")
+        print(f"DEBUG: Colunas disponíveis: {df.columns.tolist()}")
+        return {mes_str: 0 for mes_str in MESES_MAP.values()}
+
+    # Tentar converter a coluna de data
+    df[coluna_data] = pd.to_datetime(df[coluna_data], errors='coerce')
+    contagem_inicial = len(df)
+    df.dropna(subset=[coluna_data], inplace=True) # Remove linhas onde a data é inválida (NaT)
+    contagem_final = len(df)
+    if contagem_inicial != contagem_final:
+        print(f"DEBUG: Removidas {contagem_inicial - contagem_final} linhas com datas inválidas na coluna '{coluna_data}'.")
+
+
+    if df.empty: # Verifica se o DataFrame ficou vazio após remover NaT
+        # print(f"DEBUG: DataFrame vazio após dropna para coluna de data '{coluna_data}'.")
+        return {mes_str: 0 for mes_str in MESES_MAP.values()}
+
+    # Adiciona try-except para a criação da coluna 'mes'
+    try:
+        df['mes'] = df[coluna_data].dt.month
+    except AttributeError as e:
+         print(f"ERRO: Problema ao extrair mês da coluna '{coluna_data}'. Verifique o tipo de dados.")
+         print(f"DEBUG: Tipo de dados da coluna '{coluna_data}': {df[coluna_data].dtype}")
+         print(f"DEBUG: Exemplo de dados na coluna '{coluna_data}':\n{df[coluna_data].head().to_string()}")
+         return {mes_str: 0 for mes_str in MESES_MAP.values()}
+
+
     if tipo_agregacao == 'valor':
         if coluna_valor not in df.columns:
             print(f"AVISO: A coluna de valor '{coluna_valor}' não foi encontrada. O cálculo será zerado.")
             return {mes_str: 0 for mes_str in MESES_MAP.values()}
-        # Garante que a soma ocorra DEPOIS da limpeza, se aplicável fora da função
         dados_mensais = df.groupby('mes')[coluna_valor].sum()
     else: # contagem
         dados_mensais = df.groupby('mes').size() # Conta as linhas por mês
+
     return {MESES_MAP[mes_num]: dados_mensais.get(mes_num, 0) for mes_num in range(1, 13)}
 
 def calcular_faturamento_mensal(ano: int) -> dict:
@@ -143,7 +125,6 @@ def calcular_faturamento_mensal(ano: int) -> dict:
     """
     df = executar_consulta(query)
     if coluna_valor_faturamento in df.columns:
-        # Aplica a limpeza robusta
         df[coluna_valor_faturamento] = limpar_valor_monetario(df[coluna_valor_faturamento])
     else:
         print(f"ERRO CRÍTICO: A coluna de faturamento '{coluna_valor_faturamento}' não foi encontrada.")
@@ -161,68 +142,84 @@ def calcular_vendas_mensal(ano: int) -> dict:
     """
     df = executar_consulta(query)
     if coluna_valor_vendas in df.columns:
-         # Aplica a limpeza robusta
         df[coluna_valor_vendas] = limpar_valor_monetario(df[coluna_valor_vendas])
     return get_dados_mensais(df.copy(), coluna_data_vendas, coluna_valor=coluna_valor_vendas)
 
 def calcular_pendentes(tipo: str, ano: int) -> tuple[int, float, dict]:
     """Calcula BMs ou Relatórios pendentes para atendimentos iniciados no ano de análise."""
 
-    # Coluna de valor padrão (usada para soma)
-    coluna_valor_total = "VALOR - VENDA (TOTAL) DESC." # Coluna AQ (valor total)
-
     if tipo == "bm":
-        # --- LÓGICA BM PENDENTE ATUALIZADA ---
-        coluna_status = '"ATENDIMENTO (ANDAMENTO)"' # Coluna A
-        status_pendente = "'Liberação BM'"
-        coluna_data_ref_ano_mes = '"DATA (INÍCIO ATENDIMENTO)"' # Coluna AE (data base)
-        
-        query = f"""
-            SELECT {coluna_valor_total}, {coluna_data_ref_ano_mes}
-            FROM Vendas
-            WHERE {coluna_status} = {status_pendente}
-            AND strftime('%Y', {coluna_data_ref_ano_mes}) = '{ano}'; 
-        """
-        # Define a coluna de data a ser usada no Pandas e para agrupamento mensal
-        coluna_data_pd = "DATA (INÍCIO ATENDIMENTO)"
+        # --- LÓGICA BM PENDENTE - REVERTIDA PARA A ORIGINAL COM AJUSTES ---
+        coluna_valor = '"VALOR - VENDA (TOTAL)"'      # Coluna de valor correta (AQ)
+        data_ref_sql = '"DATA (ENVIO DOS RELATÓRIOS)"' # Data de referência para mês (preenchida)
+        data_vazia_sql = '"DATA (LIBERAÇÃO BM)"'       # Data que deve estar vazia
+        data_ano_sql = '"DATA (INÍCIO ATENDIMENTO)"'    # Data para filtrar o ano (AE)
 
-    elif tipo == "relatorio":
-        # Lógica original para Relatórios Pendentes
-        data_ref_pd, data_vazia_pd = 'DATA (FINAL ATENDIMENTO)', 'DATA (ENVIO DOS RELATÓRIOS)'
-        data_ref_sql, data_vazia_sql = f'"{data_ref_pd}"', f'"{data_vazia_pd}"'
-        
         query = f"""
-            SELECT "{coluna_valor_total}", {data_ref_sql}
+            SELECT {coluna_valor} AS VALOR_TEMP, {data_ref_sql} AS DATA_REF_TEMP
             FROM Vendas
             WHERE ({data_ref_sql} IS NOT NULL AND {data_ref_sql} != '')
             AND ({data_vazia_sql} IS NULL OR {data_vazia_sql} = '')
-            AND strftime('%Y', "DATA (RECEBIMENTO PO)") = '{ano}'; -- Mantém filtro de ano pelo PO
+            AND strftime('%Y', {data_ano_sql}) = '{ano}';
         """
-        # Define a coluna de data a ser usada no Pandas e para agrupamento mensal
-        coluna_data_pd = "DATA (FINAL ATENDIMENTO)"
+        coluna_valor_pd = "VALOR_TEMP" # Nome temporário para Pandas
+        coluna_data_pd = "DATA_REF_TEMP" # Nome temporário para Pandas
+
+        # --- DEBUG ADICIONADO ---
+        print(f"\n--- DEBUG BM PENDENTE (Lógica Data Vazia) ---")
+        print(f"Query SQL para BM Pendente:\n{query}")
+        # --- FIM DEBUG ---
+
+    elif tipo == "relatorio":
+        # Lógica original para Relatórios Pendentes (mantida)
+        coluna_valor_total = "VALOR - VENDA (TOTAL) DESC." # Usa DESC aqui
+        data_ref_pd_orig, data_vazia_pd = 'DATA (FINAL ATENDIMENTO)', 'DATA (ENVIO DOS RELATÓRIOS)'
+        data_ref_sql, data_vazia_sql = f'"{data_ref_pd_orig}"', f'"{data_vazia_pd}"'
+        query = f"""
+            SELECT "{coluna_valor_total}" AS VALOR_TEMP, {data_ref_sql} AS DATA_REF_TEMP
+            FROM Vendas
+            WHERE ({data_ref_sql} IS NOT NULL AND {data_ref_sql} != '')
+            AND ({data_vazia_sql} IS NULL OR {data_vazia_sql} = '')
+            AND strftime('%Y', "DATA (RECEBIMENTO PO)") = '{ano}';
+        """
+        coluna_valor_pd = "VALOR_TEMP" # Nome temporário
+        coluna_data_pd = "DATA_REF_TEMP" # Nome temporário
     else:
         print(f"ERRO: Tipo de pendente desconhecido '{tipo}'")
         return 0, 0.0, {m: 0 for m in MESES_MAP.values()}
 
     df = executar_consulta(query)
-    
-    # Aplica a limpeza robusta na coluna de valor total
-    if coluna_valor_total in df.columns:
-        df[coluna_valor_total] = limpar_valor_monetario(df[coluna_valor_total])
+
+    # --- DEBUG ADICIONADO ---
+    if tipo == "bm":
+        print(f"\nDataFrame BM Pendente ANTES da limpeza (primeiras 5 linhas):\n{df.head().to_string()}")
+    # --- FIM DEBUG ---
+
+    # Aplica a limpeza robusta na coluna de valor (usando o nome temporário)
+    if coluna_valor_pd in df.columns:
+        df[coluna_valor_pd] = limpar_valor_monetario(df[coluna_valor_pd])
     else:
-         print(f"AVISO: Coluna de valor '{coluna_valor_total}' não encontrada para pendentes.")
-         # Define a coluna como 0 para evitar erro na soma
-         df[coluna_valor_total] = 0.0
+         print(f"AVISO: Coluna de valor '{coluna_valor_pd}' não encontrada para pendentes do tipo '{tipo}'.")
+         df[coluna_valor_pd] = 0.0
+
+    # --- DEBUG ADICIONADO ---
+    if tipo == "bm":
+         print(f"\nDataFrame BM Pendente DEPOIS da limpeza (primeiras 5 linhas):\n{df.head().to_string()}")
+         print(f"Total de linhas encontradas para BM Pendente: {len(df)}")
+         print(f"Soma do valor total para BM Pendente: {df[coluna_valor_pd].sum()}")
+         print(f"--- FIM DEBUG BM PENDENTE ---\n")
+    # --- FIM DEBUG ---
 
     qtde_total = len(df)
-    valor_total = df[coluna_valor_total].sum()
+    valor_total = df[coluna_valor_pd].sum()
     
-    # Usa a coluna_data_pd definida para agrupar mensalmente pela contagem
-    qtde_mensal = get_dados_mensais(df.copy(), coluna_data_pd, 'contagem', coluna_valor=coluna_valor_total)
+    # Passa o nome correto da coluna de data (renomeada) e valor (renomeada) para get_dados_mensais
+    qtde_mensal = get_dados_mensais(df.copy(), coluna_data_pd, 'contagem', coluna_valor=coluna_valor_pd)
     
     return int(qtde_total), valor_total, qtde_mensal
 
 # --- 3. FASE 2: PREENCHIMENTO DO DASHBOARD ---
+# O restante do código permanece o mesmo...
 
 def formatar_moeda(valor) -> str:
     """Formata um número para o padrão de moeda brasileiro."""
@@ -420,4 +417,3 @@ if __name__ == "__main__":
     print("-" * 30)
     print("Processo Concluido!")
     print(f"Abra o arquivo '{NOME_OUTPUT_HTML}' para ver o resultado.")
-
