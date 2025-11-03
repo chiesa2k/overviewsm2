@@ -36,7 +36,7 @@
         <img src="https://i.postimg.cc/ydCgL04c/e4d3aeb7-dbb0-4a0a-b249-7859f2985440.png" alt="Logo da Empresa" class="h-10 md:h-12" onerror="this.style.display='none'">
         <div>
             <h1 class="text-2xl md:text-3xl font-bold text-gray-800">Dashboard de Resultados e Previsão</h1>
-            <p class="text-gray-600">Resumo dos indicadores para 2025 (até OUT)</p>
+            <p class="text-gray-600">Resumo dos indicadores para 2025 (até NOV)</p>
         </div>
     </header>
 
@@ -59,18 +59,18 @@
                 <p data-month="10">OUT: <span>R$ 2.753.492,49</span></p>
                 <p data-month="11">NOV: <span>R$ 0,00</span></p>
                 <p data-month="12">DEZ: <span>R$ 0,00</span></p>
-                <p class="summary-line">Média Mensal: <span class="font-semibold">R$ 3.760.215,52</span></p>
+                <p class="summary-line">Média Mensal: <span class="font-semibold">R$ 3.659.543,22</span></p>
                 
                 <div class="border-t border-dashed border-gray-200 mt-3 pt-3 text-sm">
-                    <p class="flex justify-between text-gray-600">2024 (mesmo período): <span class="font-medium text-gray-700">R$ 28.460.351,75</span></p>
-                    <p class="flex justify-between text-gray-600 mt-1">Variação Ano a Ano: <span class="font-bold var-positive">+18,91%</span></p>
+                    <p class="flex justify-between text-gray-600">2024 (mesmo período): <span class="font-medium text-gray-700">R$ 30.727.174,55</span></p>
+                    <p class="flex justify-between text-gray-600 mt-1">Variação Ano a Ano: <span class="font-bold var-positive">+19,10%</span></p>
                 </div>
             </div>
         </section>
 
         <section class="data-card">
             <h2 class="card-title"><i data-lucide="shopping-cart" style="color: #16a34a;"></i>Vendas</h2>
-            <div class="total-value" style="color: #16a34a;">R$ 34.076.099,03</div>
+            <div class="total-value" style="color: #16a34a;">R$ 34.134.977,18</div>
             <div class="chart-container"><canvas id="vendasChart"></canvas></div>
             <div class="monthly-data">
                 <p data-month="1">JAN: <span>R$ 3.668.047,54</span></p>
@@ -85,12 +85,12 @@
                 <p data-month="10">OUT: <span>R$ 925.390,60</span></p>
                 <p data-month="11">NOV: <span>R$ 58.878,15</span></p>
                 <p data-month="12">DEZ: <span>R$ 0,00</span></p>
-                <p class="summary-line">Média Mensal: <span class="font-semibold">R$ 3.683.412,05</span></p>
+                <p class="summary-line">Média Mensal: <span class="font-semibold">R$ 3.407.609,90</span></p>
                 
                 <!-- --- NOVA SEÇÃO DE COMPARAÇÃO PARA VENDAS --- -->
                 <div class="border-t border-dashed border-gray-200 mt-3 pt-3 text-sm">
-                    <p class="flex justify-between text-gray-600">2024 (mesmo período): <span class="font-medium text-gray-700">R$ 34.884.550,21</span></p>
-                    <p class="flex justify-between text-gray-600 mt-1">Variação Ano a Ano: <span class="font-bold var-negative">-4,97%</span></p>
+                    <p class="flex justify-between text-gray-600">2024 (mesmo período): <span class="font-medium text-gray-700">R$ 36.989.857,53</span></p>
+                    <p class="flex justify-between text-gray-600 mt-1">Variação Ano a Ano: <span class="font-bold var-negative">-7,88%</span></p>
                 </div>
             </div>
         </section>
@@ -142,14 +142,14 @@
     </main>
 
     <footer class="mt-6 text-center text-sm text-gray-500"> 
-        Atualizado em: 31/10/2025 17:01. 
+        Atualizado em: 03/11/2025 14:16. 
     </footer>
 
     
     <script>
         window.addEventListener('load', () => {
             try {
-                const mesLimiteGrafico = 9;
+                const mesLimiteGrafico = 10;
                 const todosOsMeses = ['JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN', 'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ'];
                 const chartLabels = todosOsMeses.slice(0, mesLimiteGrafico);
 
@@ -228,7 +228,7 @@
         window.addEventListener('load', () => {
             try {
                 lucide.createIcons();
-                const mesAtual = parseInt('10', 10) || new Date().getMonth() + 1;
+                const mesAtual = parseInt('11', 10) || new Date().getMonth() + 1;
                 document.querySelectorAll('.monthly-data p[data-month]').forEach(el => {
                     if (parseInt(el.getAttribute('data-month'), 10) > mesAtual) {
                         el.style.display = 'none';
