@@ -44,7 +44,7 @@
         
         <section class="data-card">
             <h2 class="card-title"><i data-lucide="dollar-sign" style="color: #4f46e5;"></i>Faturamento</h2>
-            <div class="total-value" style="color: #16a34a;">R$ 37.995.135,42</div>
+            <div class="total-value" style="color: #16a34a;">R$ 38.005.252,42</div>
             <div class="chart-container"><canvas id="faturamentoChart"></canvas></div>
             <div class="monthly-data">
                 <p data-month="1">JAN: <span>R$ 3.054.008,16</span></p>
@@ -57,7 +57,7 @@
                 <p data-month="8">AGO: <span>R$ 3.903.804,49</span></p>
                 <p data-month="9">SET: <span>R$ 3.134.825,75</span></p>
                 <p data-month="10">OUT: <span>R$ 2.818.944,04</span></p>
-                <p data-month="11">NOV: <span>R$ 1.302.276,28</span></p>
+                <p data-month="11">NOV: <span>R$ 1.312.393,28</span></p>
                 <p data-month="12">DEZ: <span>R$ 0,00</span></p>
                 <p class="summary-line">Média Mensal: <span class="font-semibold">R$ 3.669.285,91</span></p>
                 
@@ -120,7 +120,7 @@
         <section class="data-card">
             <h2 class="card-title"><i data-lucide="file-warning" style="color: #f97316;"></i>Relatórios Pendentes</h2>
             <p class="card-subtitle-custom">Quantidade de Itens (2025)</p>
-            <div class="card-main-metric">13</div>
+            <div class="card-main-metric">14</div>
             <div class="chart-container"><canvas id="relatoriosPendentesChart"></canvas></div>
             <div class="monthly-data">
                 <p data-month="1">JAN: <span>1 itens</span></p>
@@ -133,16 +133,16 @@
                 <p data-month="8">AGO: <span>2 itens</span></p>
                 <p data-month="9">SET: <span>2 itens</span></p>
                 <p data-month="10">OUT: <span>4 itens</span></p>
-                <p data-month="11">NOV: <span>1 itens</span></p>
+                <p data-month="11">NOV: <span>2 itens</span></p>
                 <p data-month="12">DEZ: <span>0 itens</span></p>
-                <p class="summary-line">Valor Total (Período): <span class="font-semibold pending-value">R$ 539.369,25</span></p>
+                <p class="summary-line">Valor Total (Período): <span class="font-semibold pending-value">R$ 541.665,25</span></p>
             </div>
         </section>
 
     </main>
 
     <footer class="mt-6 text-center text-sm text-gray-500"> 
-        Atualizado em: 11/11/2025 11:01. 
+        Atualizado em: 11/11/2025 12:01. 
     </footer>
 
     
@@ -172,7 +172,7 @@
                             {
                                 label: 'Faturamento 2025',
                                 type: 'bar',
-                                data: [3054008.160001084, 4596221.51, 2024799.8375, 3989318.0695, 4118142.92, 5149914.38, 3902879.985, 3903804.49, 3134825.745, 2818944.04, 1302276.28, 0].slice(0, mesLimiteGrafico),
+                                data: [3054008.160001084, 4596221.51, 2024799.8375, 3989318.0695, 4118142.92, 5149914.38, 3902879.985, 3903804.49, 3134825.745, 2818944.04, 1312393.28, 0].slice(0, mesLimiteGrafico),
                                 backgroundColor: 'rgba(79, 70, 229, 0.6)'
                             },
                             {
@@ -215,7 +215,7 @@
                 });
 
                 new Chart(document.getElementById('bmPendenteChart'), { type: 'bar', data: { labels: chartLabels, datasets: [{ label: 'Itens', data: [1, 1, 0, 11, 7, 6, 4, 11, 12, 41, 14, 1].slice(0, mesLimiteGrafico), backgroundColor: 'rgba(220, 38, 38, 0.6)' }] }, options: integerChartOptions });
-                new Chart(document.getElementById('relatoriosPendentesChart'), { type: 'bar', data: { labels: chartLabels, datasets: [{ label: 'Itens', data: [1, 0, 1, 1, 0, 0, 1, 2, 2, 4, 1, 0].slice(0, mesLimiteGrafico), backgroundColor: 'rgba(249, 115, 22, 0.6)' }] }, options: integerChartOptions });
+                new Chart(document.getElementById('relatoriosPendentesChart'), { type: 'bar', data: { labels: chartLabels, datasets: [{ label: 'Itens', data: [1, 0, 1, 1, 0, 0, 1, 2, 2, 4, 2, 0].slice(0, mesLimiteGrafico), backgroundColor: 'rgba(249, 115, 22, 0.6)' }] }, options: integerChartOptions });
             
             } catch (error) {
                 console.error("ERRO ao desenhar os gráficos:", error);
