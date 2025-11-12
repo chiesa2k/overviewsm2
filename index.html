@@ -89,8 +89,8 @@
                 
                 <!-- --- NOVA SEÇÃO DE COMPARAÇÃO PARA VENDAS --- -->
                 <div class="border-t border-dashed border-gray-200 mt-3 pt-3 text-sm">
-                    <p class="flex justify-between text-gray-600">2024 (mesmo período): <span class="font-medium text-gray-700">R$ 36.995.264,25</span></p>
-                    <p class="flex justify-between text-gray-600 mt-1">Variação Ano a Ano: <span class="font-bold var-negative">-3,43%</span></p>
+                    <p class="flex justify-between text-gray-600">2024 (mesmo período): <span class="font-medium text-gray-700">R$ 37.019.764,25</span></p>
+                    <p class="flex justify-between text-gray-600 mt-1">Variação Ano a Ano: <span class="font-bold var-negative">-3,49%</span></p>
                 </div>
             </div>
         </section>
@@ -98,7 +98,7 @@
         <section class="data-card">
             <h2 class="card-title"><i data-lucide="alert-circle" style="color: #dc2626;"></i>BM Pendente</h2>
             <p class="card-subtitle-custom">Quantidade de Itens (2025)</p>
-            <div class="card-main-metric">104</div>
+            <div class="card-main-metric">108</div>
             <div class="chart-container"><canvas id="bmPendenteChart"></canvas></div>
             <div class="monthly-data">
                  <p data-month="1">JAN: <span>1 itens</span></p>
@@ -111,9 +111,9 @@
                 <p data-month="8">AGO: <span>11 itens</span></p>
                 <p data-month="9">SET: <span>12 itens</span></p>
                 <p data-month="10">OUT: <span>38 itens</span></p>
-                <p data-month="11">NOV: <span>14 itens</span></p>
+                <p data-month="11">NOV: <span>18 itens</span></p>
                 <p data-month="12">DEZ: <span>1 itens</span></p>
-                <p class="summary-line">Valor Total (Período): <span class="font-semibold pending-value">R$ 3.390.076,31</span></p>
+                <p class="summary-line">Valor Total (Período): <span class="font-semibold pending-value">R$ 3.392.876,31</span></p>
             </div>
         </section>
 
@@ -142,7 +142,7 @@
     </main>
 
     <footer class="mt-6 text-center text-sm text-gray-500"> 
-        Atualizado em: 12/11/2025 08:24. 
+        Atualizado em: 12/11/2025 14:01. 
     </footer>
 
     
@@ -203,7 +203,7 @@
                             {
                                 label: 'Vendas 2024',
                                 type: 'line',
-                                data: [2947344.25, 5970860.61, 2165748.24, 5638401.4350000005, 2205878.57, 6554545.3852, 2491525.85, 5096632.575, 1781520.01, 2142807.32, 1992723.2695010842, 1566654.033865].slice(0, mesLimiteGrafico),
+                                data: [2947344.25, 5995360.61, 2165748.24, 5638401.4350000005, 2205878.57, 6554545.3852, 2491525.85, 5096632.575, 1781520.01, 2142807.32, 1992723.2695010842, 1566654.033865].slice(0, mesLimiteGrafico),
                                 borderColor: 'rgba(220, 38, 38, 0.8)',
                                 backgroundColor: 'rgba(220, 38, 38, 0.1)',
                                 tension: 0.1,
@@ -214,7 +214,7 @@
                     options: baseChartOptions
                 });
 
-                new Chart(document.getElementById('bmPendenteChart'), { type: 'bar', data: { labels: chartLabels, datasets: [{ label: 'Itens', data: [1, 1, 0, 9, 7, 6, 4, 11, 12, 38, 14, 1].slice(0, mesLimiteGrafico), backgroundColor: 'rgba(220, 38, 38, 0.6)' }] }, options: integerChartOptions });
+                new Chart(document.getElementById('bmPendenteChart'), { type: 'bar', data: { labels: chartLabels, datasets: [{ label: 'Itens', data: [1, 1, 0, 9, 7, 6, 4, 11, 12, 38, 18, 1].slice(0, mesLimiteGrafico), backgroundColor: 'rgba(220, 38, 38, 0.6)' }] }, options: integerChartOptions });
                 new Chart(document.getElementById('relatoriosPendentesChart'), { type: 'bar', data: { labels: chartLabels, datasets: [{ label: 'Itens', data: [1, 0, 1, 1, 0, 0, 1, 2, 2, 4, 2, 0].slice(0, mesLimiteGrafico), backgroundColor: 'rgba(249, 115, 22, 0.6)' }] }, options: integerChartOptions });
             
             } catch (error) {
