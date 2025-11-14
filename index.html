@@ -44,7 +44,7 @@
         
         <section class="data-card">
             <h2 class="card-title"><i data-lucide="dollar-sign" style="color: #4f46e5;"></i>Faturamento</h2>
-            <div class="total-value" style="color: #16a34a;">R$ 38.643.132,22</div>
+            <div class="total-value" style="color: #16a34a;">R$ 38.719.201,32</div>
             <div class="chart-container"><canvas id="faturamentoChart"></canvas></div>
             <div class="monthly-data">
                 <p data-month="1">JAN: <span>R$ 3.054.008,16</span></p>
@@ -57,7 +57,7 @@
                 <p data-month="8">AGO: <span>R$ 3.903.804,49</span></p>
                 <p data-month="9">SET: <span>R$ 3.134.825,75</span></p>
                 <p data-month="10">OUT: <span>R$ 2.818.944,04</span></p>
-                <p data-month="11">NOV: <span>R$ 1.950.273,08</span></p>
+                <p data-month="11">NOV: <span>R$ 2.026.342,18</span></p>
                 <p data-month="12">DEZ: <span>R$ 0,00</span></p>
                 <p class="summary-line">Média Mensal: <span class="font-semibold">R$ 3.669.285,91</span></p>
                 
@@ -70,7 +70,7 @@
 
         <section class="data-card">
             <h2 class="card-title"><i data-lucide="shopping-cart" style="color: #16a34a;"></i>Vendas</h2>
-            <div class="total-value" style="color: #16a34a;">R$ 37.031.681,33</div>
+            <div class="total-value" style="color: #16a34a;">R$ 37.105.519,33</div>
             <div class="chart-container"><canvas id="vendasChart"></canvas></div>
             <div class="monthly-data">
                 <p data-month="1">JAN: <span>R$ 3.668.047,54</span></p>
@@ -82,15 +82,15 @@
                 <p data-month="7">JUL: <span>R$ 4.075.195,99</span></p>
                 <p data-month="8">AGO: <span>R$ 3.856.852,54</span></p>
                 <p data-month="9">SET: <span>R$ 1.855.348,33</span></p>
-                <p data-month="10">OUT: <span>R$ 2.576.472,97</span></p>
-                <p data-month="11">NOV: <span>R$ 1.385.563,13</span></p>
+                <p data-month="10">OUT: <span>R$ 2.611.022,97</span></p>
+                <p data-month="11">NOV: <span>R$ 1.424.851,13</span></p>
                 <p data-month="12">DEZ: <span>R$ 0,00</span></p>
-                <p class="summary-line">Média Mensal: <span class="font-semibold">R$ 3.564.611,82</span></p>
+                <p class="summary-line">Média Mensal: <span class="font-semibold">R$ 3.568.066,82</span></p>
                 
                 <!-- --- NOVA SEÇÃO DE COMPARAÇÃO PARA VENDAS --- -->
                 <div class="border-t border-dashed border-gray-200 mt-3 pt-3 text-sm">
                     <p class="flex justify-between text-gray-600">2024 (mesmo período): <span class="font-medium text-gray-700">R$ 37.019.764,25</span></p>
-                    <p class="flex justify-between text-gray-600 mt-1">Variação Ano a Ano: <span class="font-bold var-negative">-3,71%</span></p>
+                    <p class="flex justify-between text-gray-600 mt-1">Variação Ano a Ano: <span class="font-bold var-negative">-3,62%</span></p>
                 </div>
             </div>
         </section>
@@ -98,7 +98,7 @@
         <section class="data-card">
             <h2 class="card-title"><i data-lucide="alert-circle" style="color: #dc2626;"></i>BM Pendente</h2>
             <p class="card-subtitle-custom">Quantidade de Itens (2025)</p>
-            <div class="card-main-metric">105</div>
+            <div class="card-main-metric">106</div>
             <div class="chart-container"><canvas id="bmPendenteChart"></canvas></div>
             <div class="monthly-data">
                  <p data-month="1">JAN: <span>1 itens</span></p>
@@ -111,9 +111,9 @@
                 <p data-month="8">AGO: <span>11 itens</span></p>
                 <p data-month="9">SET: <span>12 itens</span></p>
                 <p data-month="10">OUT: <span>36 itens</span></p>
-                <p data-month="11">NOV: <span>23 itens</span></p>
+                <p data-month="11">NOV: <span>24 itens</span></p>
                 <p data-month="12">DEZ: <span>1 itens</span></p>
-                <p class="summary-line">Valor Total (Período): <span class="font-semibold pending-value">R$ 3.257.183,81</span></p>
+                <p class="summary-line">Valor Total (Período): <span class="font-semibold pending-value">R$ 3.263.782,81</span></p>
             </div>
         </section>
 
@@ -142,7 +142,7 @@
     </main>
 
     <footer class="mt-6 text-center text-sm text-gray-500"> 
-        Atualizado em: 13/11/2025 17:01. 
+        Atualizado em: 14/11/2025 14:01. 
     </footer>
 
     
@@ -172,7 +172,7 @@
                             {
                                 label: 'Faturamento 2025',
                                 type: 'bar',
-                                data: [3054008.160001084, 4596221.51, 2024799.8375, 3989318.0695, 4118142.92, 5149914.38, 3902879.985, 3903804.49, 3134825.745, 2818944.04, 1950273.08, 0].slice(0, mesLimiteGrafico),
+                                data: [3054008.160001084, 4596221.51, 2024799.8375, 3989318.0695, 4118142.92, 5149914.38, 3902879.985, 3903804.49, 3134825.745, 2818944.04, 2026342.18, 0].slice(0, mesLimiteGrafico),
                                 backgroundColor: 'rgba(79, 70, 229, 0.6)'
                             },
                             {
@@ -197,7 +197,7 @@
                              {
                                 label: 'Vendas 2025',
                                 type: 'bar',
-                                data: [3668047.54, 5495652.427, 1655856.24, 5162238.39, 3732635.77, 3567818.005, 4075195.99, 3856852.54, 1855348.33, 2576472.97, 1385563.13, 0].slice(0, mesLimiteGrafico),
+                                data: [3668047.54, 5495652.427, 1655856.24, 5162238.39, 3732635.77, 3567818.005, 4075195.99, 3856852.54, 1855348.33, 2611022.97, 1424851.13, 0].slice(0, mesLimiteGrafico),
                                 backgroundColor: 'rgba(22, 163, 74, 0.6)'
                             },
                             {
@@ -214,7 +214,7 @@
                     options: baseChartOptions
                 });
 
-                new Chart(document.getElementById('bmPendenteChart'), { type: 'bar', data: { labels: chartLabels, datasets: [{ label: 'Itens', data: [1, 1, 0, 9, 1, 6, 4, 11, 12, 36, 23, 1].slice(0, mesLimiteGrafico), backgroundColor: 'rgba(220, 38, 38, 0.6)' }] }, options: integerChartOptions });
+                new Chart(document.getElementById('bmPendenteChart'), { type: 'bar', data: { labels: chartLabels, datasets: [{ label: 'Itens', data: [1, 1, 0, 9, 1, 6, 4, 11, 12, 36, 24, 1].slice(0, mesLimiteGrafico), backgroundColor: 'rgba(220, 38, 38, 0.6)' }] }, options: integerChartOptions });
                 new Chart(document.getElementById('relatoriosPendentesChart'), { type: 'bar', data: { labels: chartLabels, datasets: [{ label: 'Itens', data: [1, 0, 1, 1, 0, 0, 1, 2, 2, 4, 2, 0].slice(0, mesLimiteGrafico), backgroundColor: 'rgba(249, 115, 22, 0.6)' }] }, options: integerChartOptions });
             
             } catch (error) {
