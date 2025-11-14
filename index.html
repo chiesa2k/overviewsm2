@@ -98,7 +98,7 @@
         <section class="data-card">
             <h2 class="card-title"><i data-lucide="alert-circle" style="color: #dc2626;"></i>BM Pendente</h2>
             <p class="card-subtitle-custom">Quantidade de Itens (2025)</p>
-            <div class="card-main-metric">106</div>
+            <div class="card-main-metric">105</div>
             <div class="chart-container"><canvas id="bmPendenteChart"></canvas></div>
             <div class="monthly-data">
                  <p data-month="1">JAN: <span>1 itens</span></p>
@@ -111,9 +111,9 @@
                 <p data-month="8">AGO: <span>11 itens</span></p>
                 <p data-month="9">SET: <span>12 itens</span></p>
                 <p data-month="10">OUT: <span>36 itens</span></p>
-                <p data-month="11">NOV: <span>24 itens</span></p>
+                <p data-month="11">NOV: <span>23 itens</span></p>
                 <p data-month="12">DEZ: <span>1 itens</span></p>
-                <p class="summary-line">Valor Total (Período): <span class="font-semibold pending-value">R$ 3.263.782,81</span></p>
+                <p class="summary-line">Valor Total (Período): <span class="font-semibold pending-value">R$ 3.254.711,81</span></p>
             </div>
         </section>
 
@@ -142,7 +142,7 @@
     </main>
 
     <footer class="mt-6 text-center text-sm text-gray-500"> 
-        Atualizado em: 14/11/2025 15:01. 
+        Atualizado em: 14/11/2025 16:01. 
     </footer>
 
     
@@ -214,7 +214,7 @@
                     options: baseChartOptions
                 });
 
-                new Chart(document.getElementById('bmPendenteChart'), { type: 'bar', data: { labels: chartLabels, datasets: [{ label: 'Itens', data: [1, 1, 0, 9, 1, 6, 4, 11, 12, 36, 24, 1].slice(0, mesLimiteGrafico), backgroundColor: 'rgba(220, 38, 38, 0.6)' }] }, options: integerChartOptions });
+                new Chart(document.getElementById('bmPendenteChart'), { type: 'bar', data: { labels: chartLabels, datasets: [{ label: 'Itens', data: [1, 1, 0, 9, 1, 6, 4, 11, 12, 36, 23, 1].slice(0, mesLimiteGrafico), backgroundColor: 'rgba(220, 38, 38, 0.6)' }] }, options: integerChartOptions });
                 new Chart(document.getElementById('relatoriosPendentesChart'), { type: 'bar', data: { labels: chartLabels, datasets: [{ label: 'Itens', data: [1, 0, 1, 1, 0, 0, 1, 2, 2, 4, 2, 0].slice(0, mesLimiteGrafico), backgroundColor: 'rgba(249, 115, 22, 0.6)' }] }, options: integerChartOptions });
             
             } catch (error) {
