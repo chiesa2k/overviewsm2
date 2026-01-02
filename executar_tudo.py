@@ -135,6 +135,13 @@ if __name__ == "__main__":
             shutil.copy(caminho_html_gerado, caminho_html_git)
             print("- Index.html atualizado copiado de volta para a pasta do projeto.")
             
+            # --- CORREÇÃO: Configuração Automática de Identidade ---
+            # Define sua identidade real para o Git
+            print("- Definindo identidade do usuário para o Git...")
+            executar_comando('git config user.email "bluefraggroup@gmail.com"', pasta_execucao=PASTA_PROJETO_ORIGEM)
+            executar_comando('git config user.name "chiesa2k"', pasta_execucao=PASTA_PROJETO_ORIGEM)
+            # -------------------------------------------------------
+
             # 2. Executa os comandos Git na pasta do projeto original
             data_hora = datetime.now().strftime("%d/%m/%Y %H:%M")
             cmd_git = f'git pull && git add . && git commit -m "Auto Update {data_hora}" && git push'
