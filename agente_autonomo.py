@@ -14,10 +14,9 @@ load_dotenv()
 # --- 1. CONFIGURAÇÃO ---
 NOME_BANCO_DADOS = "gerenciamento.db"
 NOME_TEMPLATE_HTML = "dashboard_template.html"
-# O nome de saída será dinâmico agora
 MESES_MAP = {1: 'JAN', 2: 'FEV', 3: 'MAR', 4: 'ABR', 5: 'MAI', 6: 'JUN', 7: 'JUL', 8: 'AGO', 9: 'SET', 10: 'OUT', 11: 'NOV', 12: 'DEZ'}
 
-# --- 2. FERRAMENTAS DE CÁLCULO (MANTIDAS IGUAIS) ---
+# --- 2. FERRAMENTAS DE CÁLCULO ---
 
 def limpar_valor_monetario(series: pd.Series) -> pd.Series:
     """Converte uma Series de texto (moeda brasileira) para numérico de forma robusta."""
@@ -166,7 +165,7 @@ def calcular_pendentes(tipo: str, ano: int) -> tuple[int, float, dict]:
     
     return int(qtde_total), valor_total, qtde_mensal
 
-# --- 3. FASE 2: GERAÇÃO DO DASHBOARD E BOTÃO MÁGICO ---
+# --- 3. FASE 2: GERAÇÃO DO DASHBOARD ---
 
 def formatar_moeda(valor) -> str:
     if valor is None or not isinstance(valor, (int, float, np.number)): valor = 0.0
@@ -182,13 +181,12 @@ class NumpyEncoder(json.JSONEncoder):
 def gerar_script_graficos(dados: dict, mes_limite_grafico: int) -> str:
     """Gera o script dos gráficos com base nos dados fornecidos."""
     fat_mensal_lista = list(dados.get("FATURAMENTO_MENSAL", {}).values())
-    fat_mensal_ant_lista = list(dados.get("FATURAMENTO_MENSAL_ANT", {}).values()) # Genérico ANT (Anterior)
+    fat_mensal_ant_lista = list(dados.get("FATURAMENTO_MENSAL_ANT", {}).values())
     ven_mensal_lista = list(dados.get("VENDAS_MENSAL", {}).values())
-    ven_mensal_ant_lista = list(dados.get("VENDAS_MENSAL_ANT", {}).values()) # Genérico ANT
+    ven_mensal_ant_lista = list(dados.get("VENDAS_MENSAL_ANT", {}).values())
     bm_mensal_lista = list(dados.get("BM_PENDENTE_MENSAL", {}).values())
     rel_mensal_lista = list(dados.get("RELATORIOS_PENDENTES_MENSAL", {}).values())
     
-    # Rótulos dinâmicos para a legenda
     ano_atual_label = str(dados.get("ANO_ATUAL_LABEL", "Atual"))
     ano_ant_label = str(dados.get("ANO_ANTERIOR_LABEL", "Anterior"))
 
@@ -273,32 +271,67 @@ def gerar_script_graficos(dados: dict, mes_limite_grafico: int) -> str:
     return script
 
 def injetar_botao_navegacao(html_content: str, texto_botao: str, link_destino: str) -> str:
-    """Insere um botão flutuante elegante no canto da tela via HTML/CSS."""
+    """
+    Insere um botão com design 'Premium/Dashboard' no canto superior direito.
+    Usa gradiente suave, sombras e fontes modernas.
+    """
     botao_html = f"""
     <style>
-        .floating-btn {{
+        .dashboard-nav-btn {{
             position: fixed;
-            top: 20px;
-            right: 20px;
-            background-color: #4F46E5;
-            color: white;
+            top: 24px;
+            right: 24px;
+            
+            /* Design Visual */
+            background: linear-gradient(135deg, #4F46E5 0%, #4338ca 100%);
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.2);
             padding: 10px 20px;
-            border-radius: 50px;
+            border-radius: 8px;
+            
+            /* Tipografia */
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-size: 14px;
+            font-weight: 600;
             text-decoration: none;
-            font-weight: bold;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            transition: all 0.3s ease;
-            z-index: 9999;
-            font-family: sans-serif;
-            border: 2px solid white;
+            letter-spacing: 0.3px;
+            
+            /* Efeitos e Sombras */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            transition: all 0.2s ease-in-out;
+            z-index: 10000;
+            
+            /* Flex para alinhar icone se houver */
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
         }}
-        .floating-btn:hover {{
-            background-color: #4338ca;
-            transform: scale(1.05);
-            box-shadow: 0 6px 8px rgba(0,0,0,0.2);
+
+        .dashboard-nav-btn:hover {{
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.15), 0 4px 6px -2px rgba(0, 0, 0, 0.1);
+            filter: brightness(1.1);
+            background: linear-gradient(135deg, #4338ca 0%, #3730a3 100%);
+        }}
+
+        .dashboard-nav-btn:active {{
+            transform: translateY(0);
+        }}
+        
+        /* Ícone simples de calendário em CSS puro */
+        .icon-calendar {{
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='white'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z'/%3E%3C/svg%3E");
+            background-size: cover;
         }}
     </style>
-    <a href="{link_destino}" class="floating-btn">📅 {texto_botao}</a>
+    
+    <a href="{link_destino}" class="dashboard-nav-btn">
+        <span class="icon-calendar"></span>
+        {texto_botao}
+    </a>
     """
     # Injeta antes do fechamento do body
     return html_content.replace("</body>", f"{botao_html}\n</body>")
@@ -306,21 +339,19 @@ def injetar_botao_navegacao(html_content: str, texto_botao: str, link_destino: s
 def gerar_dashboard(ano_analise, mes_exibicao, nome_arquivo_saida, botao_texto, botao_link):
     """Função genérica para gerar um dashboard de qualquer ano."""
     
-    # Define o limite de análise (meses anteriores ao atual)
-    # Se for um ano passado (ex: 2025 quando estamos em 2026), queremos ver todos os 12 meses.
+    # Define o limite de análise
     ano_real_sistema = datetime.now().year
     
     if ano_analise < ano_real_sistema:
-        mes_limite_analise = 12 # Ano fechado, mostra tudo
-        mes_exibicao = 12       # Gráficos vão até DEZ
+        mes_limite_analise = 12
+        mes_exibicao = 12
     else:
-        mes_limite_analise = mes_exibicao - 1 # Ano corrente, mostra até mês passado
-        if mes_limite_analise < 1: mes_limite_analise = 1 # Proteção para Janeiro
+        mes_limite_analise = mes_exibicao - 1
+        if mes_limite_analise < 1: mes_limite_analise = 1
 
     ano_anterior = ano_analise - 1
     
     print(f"Gerando Dashboard: {nome_arquivo_saida}")
-    print(f"Ano Foco: {ano_analise} | Comparativo: {ano_anterior} | Meses Exibidos: {mes_exibicao}")
 
     # Cálculos
     fat_mensal = calcular_faturamento_mensal(ano_analise)
@@ -331,11 +362,8 @@ def gerar_dashboard(ano_analise, mes_exibicao, nome_arquivo_saida, botao_texto, 
     # Totais
     fat_total_exibicao = sum(list(fat_mensal.values())[:mes_exibicao])
     ven_total_exibicao = sum(list(ven_mensal.values())[:mes_exibicao])
-    
-    # Totais para Variação (Considera meses fechados)
     fat_total_analise = sum(list(fat_mensal.values())[:mes_limite_analise])
     fat_total_ant_comp = sum(list(fat_mensal_ant.values())[:mes_limite_analise])
-    
     ven_total_analise = sum(list(ven_mensal.values())[:mes_limite_analise])
     ven_total_ant_comp = sum(list(ven_mensal_ant.values())[:mes_limite_analise])
 
@@ -350,7 +378,6 @@ def gerar_dashboard(ano_analise, mes_exibicao, nome_arquivo_saida, botao_texto, 
     # Variações
     variacao_faturamento = ((fat_total_analise - fat_total_ant_comp) / fat_total_ant_comp * 100) if fat_total_ant_comp > 0 else 0
     variacao_faturamento_classe = "var-positive" if variacao_faturamento >= 0 else "var-negative"
-    
     variacao_vendas = ((ven_total_analise - ven_total_ant_comp) / ven_total_ant_comp * 100) if ven_total_ant_comp > 0 else 0
     variacao_vendas_classe = "var-positive" if variacao_vendas >= 0 else "var-negative"
     
@@ -363,11 +390,11 @@ def gerar_dashboard(ano_analise, mes_exibicao, nome_arquivo_saida, botao_texto, 
             "FATURAMENTO_TOTAL": formatar_moeda(fat_total_exibicao),
             "VENDAS_TOTAL": formatar_moeda(ven_total_exibicao),
             "FATURAMENTO_MEDIA": formatar_moeda(fat_media_correta),
-            "FATURAMENTO_TOTAL_2024": formatar_moeda(fat_total_ant_comp), # Mantivemos a chave ID do template
+            "FATURAMENTO_TOTAL_2024": formatar_moeda(fat_total_ant_comp),
             "FATURAMENTO_VARIACAO": f"{variacao_faturamento:+.2f}%".replace('.',','),
             "FATURAMENTO_VARIACAO_CLASSE": variacao_faturamento_classe,
             "VENDAS_MEDIA": formatar_moeda(ven_media_correta),
-            "VENDAS_TOTAL_2024": formatar_moeda(ven_total_ant_comp), # Mantivemos a chave ID do template
+            "VENDAS_TOTAL_2024": formatar_moeda(ven_total_ant_comp),
             "VENDAS_VARIACAO": f"{variacao_vendas:+.2f}%".replace('.',','),
             "VENDAS_VARIACAO_CLASSE": variacao_vendas_classe,
             "BM_PENDENTE_QTDE_TOTAL": str(bm_qtde),
@@ -380,7 +407,6 @@ def gerar_dashboard(ano_analise, mes_exibicao, nome_arquivo_saida, botao_texto, 
             "ANO_DE_ANALISE": str(ano_analise),
         }
 
-        # Substituição de listas mensais no HTML (tabelas se houver)
         for mes_str, val_mes in fat_mensal.items(): dados_para_substituir[f"FATURAMENTO_MENSAL_{mes_str}"] = formatar_moeda(val_mes)
         for mes_str, val_mes in ven_mensal.items(): dados_para_substituir[f"VENDAS_MENSAL_{mes_str}"] = formatar_moeda(val_mes)
         for mes_str, qtde_mes in bm_mensal.items(): dados_para_substituir[f"BM_PENDENTE_MENSAL_{mes_str}"] = f"{int(qtde_mes)} itens"
@@ -389,7 +415,6 @@ def gerar_dashboard(ano_analise, mes_exibicao, nome_arquivo_saida, botao_texto, 
         for marcador, valor_final in dados_para_substituir.items():
             html_final = html_final.replace(f"{{{{{marcador}}}}}", valor_final)
         
-        # Preparar dados para Gráficos
         dados_graficos = {
             "FATURAMENTO_MENSAL": fat_mensal, 
             "FATURAMENTO_MENSAL_ANT": fat_mensal_ant,
@@ -404,7 +429,7 @@ def gerar_dashboard(ano_analise, mes_exibicao, nome_arquivo_saida, botao_texto, 
         script_graficos = gerar_script_graficos(dados_graficos, mes_exibicao)
         html_final = html_final.replace("{{GRAFICOS_SCRIPT}}", script_graficos) 
 
-        # --- AQUI ESTÁ A MÁGICA: INJETA O BOTÃO ---
+        # INJETA O BOTÃO NOVO (PREMIUM)
         html_final = injetar_botao_navegacao(html_final, botao_texto, botao_link)
 
         with open(nome_arquivo_saida, "w", encoding="utf-8") as f:
@@ -425,21 +450,17 @@ if __name__ == "__main__":
     print(f"INICIANDO GERAÇÃO MULTI-ANO - DATA: {agora}")
     
     # 1. Gera o Dashboard HISTÓRICO (2025)
-    # Ele será salvo como 'historico_2025.html'
-    # O botão dele apontará para 'index.html' (Voltar para 2026)
     gerar_dashboard(
         ano_analise=2025, 
-        mes_exibicao=12, # Mostra o ano completo
+        mes_exibicao=12,
         nome_arquivo_saida="historico_2025.html",
-        botao_texto=f"Ver Atual ({ano_atual_sistema})",
+        botao_texto=f"Ver Painel {ano_atual_sistema}",
         botao_link="index.html"
     )
     
     print("-" * 20)
 
     # 2. Gera o Dashboard ATUAL (2026)
-    # Ele será salvo como 'index.html' (O padrão que o GitHub Pages abre)
-    # O botão dele apontará para 'historico_2025.html' (Ver Passado)
     gerar_dashboard(
         ano_analise=ano_atual_sistema, 
         mes_exibicao=mes_atual_sistema,
