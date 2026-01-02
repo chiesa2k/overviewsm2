@@ -62,8 +62,8 @@
                 <p class="summary-line">Média Mensal: <span class="font-semibold">R$ 0,00</span></p>
                 
                 <div class="border-t border-dashed border-gray-200 mt-3 pt-3 text-sm">
-                    <p class="flex justify-between text-gray-600">2024 (mesmo período): <span class="font-medium text-gray-700">R$ 0,00</span></p>
-                    <p class="flex justify-between text-gray-600 mt-1">Variação Ano a Ano: <span class="font-bold var-positive">+0,00%</span></p>
+                    <p class="flex justify-between text-gray-600">2024 (mesmo período): <span class="font-medium text-gray-700">R$ 3.062.750,16</span></p>
+                    <p class="flex justify-between text-gray-600 mt-1">Variação Ano a Ano: <span class="font-bold var-negative">-100,00%</span></p>
                 </div>
             </div>
         </section>
@@ -89,8 +89,8 @@
                 
                 <!-- --- NOVA SEÇÃO DE COMPARAÇÃO PARA VENDAS --- -->
                 <div class="border-t border-dashed border-gray-200 mt-3 pt-3 text-sm">
-                    <p class="flex justify-between text-gray-600">2024 (mesmo período): <span class="font-medium text-gray-700">R$ 0,00</span></p>
-                    <p class="flex justify-between text-gray-600 mt-1">Variação Ano a Ano: <span class="font-bold var-positive">+0,00%</span></p>
+                    <p class="flex justify-between text-gray-600">2024 (mesmo período): <span class="font-medium text-gray-700">R$ 3.668.047,54</span></p>
+                    <p class="flex justify-between text-gray-600 mt-1">Variação Ano a Ano: <span class="font-bold var-negative">-100,00%</span></p>
                 </div>
             </div>
         </section>
@@ -142,14 +142,14 @@
     </main>
 
     <footer class="mt-6 text-center text-sm text-gray-500"> 
-        Atualizado em: 02/01/2026 11:14. 
+        Atualizado em: 02/01/2026 11:30. 
     </footer>
 
     
     <script>
         window.addEventListener('load', () => {
             try {
-                const mesLimiteGrafico = 0;
+                const mesLimiteGrafico = 1;
                 const todosOsMeses = ['JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN', 'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ'];
                 const chartLabels = todosOsMeses.slice(0, mesLimiteGrafico);
 
@@ -170,13 +170,13 @@
                         labels: chartLabels,
                         datasets: [
                             {
-                                label: 'Faturamento 2025',
+                                label: 'Faturamento 2026',
                                 type: 'bar',
                                 data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0].slice(0, mesLimiteGrafico),
                                 backgroundColor: 'rgba(79, 70, 229, 0.6)'
                             },
                             {
-                                label: 'Faturamento 2024',
+                                label: 'Faturamento 2025',
                                 type: 'line',
                                 data: [3062750.160001084, 4600021.51, 2024799.8375, 3989318.0695, 4118142.92, 5149914.38, 3902879.985, 3903804.49, 3134825.745, 2874144.04, 2932768.47, 959900.99].slice(0, mesLimiteGrafico),
                                 borderColor: 'rgba(220, 38, 38, 0.8)',
@@ -195,13 +195,13 @@
                         labels: chartLabels,
                         datasets: [
                              {
-                                label: 'Vendas 2025',
+                                label: 'Vendas 2026',
                                 type: 'bar',
                                 data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0].slice(0, mesLimiteGrafico),
                                 backgroundColor: 'rgba(22, 163, 74, 0.6)'
                             },
                             {
-                                label: 'Vendas 2024',
+                                label: 'Vendas 2025',
                                 type: 'line',
                                 data: [3668047.54, 5537818.417, 1632502.74, 5174698.29, 3724622.62, 3567818.005, 4139105.99, 3857152.54, 1915161.33, 2701793.97, 2352691.67, 317646.0].slice(0, mesLimiteGrafico),
                                 borderColor: 'rgba(220, 38, 38, 0.8)',
@@ -239,6 +239,32 @@
             }
         });
     </script>
+
+    <style>
+        .floating-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #4F46E5;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            z-index: 9999;
+            font-family: sans-serif;
+            border: 2px solid white;
+        }
+        .floating-btn:hover {
+            background-color: #4338ca;
+            transform: scale(1.05);
+            box-shadow: 0 6px 8px rgba(0,0,0,0.2);
+        }
+    </style>
+    <a href="historico_2025.html" class="floating-btn">📅 Ver Histórico 2025</a>
+    
 </body>
 </html>
 
