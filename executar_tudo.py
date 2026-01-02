@@ -4,6 +4,10 @@ import shutil
 from datetime import datetime
 import sys
 
+# --- CONFIGURAÇÃO DE IDENTIDADE GITHUB ---
+GIT_NOME = "chiesa2k"
+GIT_EMAIL = "bluefraggroup@gmail.com"
+
 # --- CONFIGURAÇÃO (CAMINHOS FIXOS) ---
 # A "oficina" onde o robô trabalha e onde está o ambiente virtual (venv)
 PASTA_TRABALHO = r"C:\automacao_dashboard"
@@ -126,31 +130,46 @@ if __name__ == "__main__":
     # ETAPA 4: Publicar no GitHub
     print("\n[ETAPA 4] Publicando no GitHub...")
     
-    caminho_html_gerado = os.path.join(PASTA_TRABALHO, "index.html")
-    caminho_html_git = os.path.join(PASTA_PROJETO_ORIGEM, "index.html")
+    # --- NOVO: Lógica inteligente de cópia de arquivos ---
+    # Procura por 'index.html' E qualquer arquivo que comece com 'historico_'
+    arquivos_para_copiar = []
     
-    if os.path.exists(caminho_html_gerado):
-        # 1. Copia o HTML novo de volta para a pasta do Git
+    # Varre a oficina em busca de arquivos HTML gerados
+    for arquivo in os.listdir(PASTA_TRABALHO):
+        if arquivo == "index.html" or (arquivo.startswith("historico_") and arquivo.endswith(".html")):
+            arquivos_para_copiar.append(arquivo)
+
+    count_copiados = 0
+    for nome_arquivo in arquivos_para_copiar:
+        caminho_gerado = os.path.join(PASTA_TRABALHO, nome_arquivo)
+        caminho_git = os.path.join(PASTA_PROJETO_ORIGEM, nome_arquivo)
+        
+        if os.path.exists(caminho_gerado):
+            try:
+                shutil.copy(caminho_gerado, caminho_git)
+                print(f"- {nome_arquivo} atualizado e copiado para a pasta do projeto.")
+                count_copiados += 1
+            except Exception as e:
+                print(f"ERRO ao copiar {nome_arquivo}: {e}")
+    
+    if count_copiados > 0:
         try:
-            shutil.copy(caminho_html_gerado, caminho_html_git)
-            print("- Index.html atualizado copiado de volta para a pasta do projeto.")
-            
-            # --- CORREÇÃO: Configuração Automática de Identidade ---
-            # Define sua identidade real para o Git
-            print("- Definindo identidade do usuário para o Git...")
-            executar_comando('git config user.email "bluefraggroup@gmail.com"', pasta_execucao=PASTA_PROJETO_ORIGEM)
-            executar_comando('git config user.name "chiesa2k"', pasta_execucao=PASTA_PROJETO_ORIGEM)
-            # -------------------------------------------------------
+            # --- CONFIGURAÇÃO DE IDENTIDADE ---
+            print(f"- Configurando Git para usuário: {GIT_NOME} ({GIT_EMAIL})...")
+            executar_comando(f'git config user.email "{GIT_EMAIL}"', pasta_execucao=PASTA_PROJETO_ORIGEM)
+            executar_comando(f'git config user.name "{GIT_NOME}"', pasta_execucao=PASTA_PROJETO_ORIGEM)
+            # ----------------------------------
 
             # 2. Executa os comandos Git na pasta do projeto original
             data_hora = datetime.now().strftime("%d/%m/%Y %H:%M")
+            # 'git add .' vai pegar todos os novos arquivos copiados
             cmd_git = f'git pull && git add . && git commit -m "Auto Update {data_hora}" && git push'
             executar_comando(cmd_git, pasta_execucao=PASTA_PROJETO_ORIGEM)
         except Exception as e:
             print(f"ERRO na etapa do Git: {e}")
-            # Não damos exit(1) aqui para que o n8n considere sucesso se o dashboard foi gerado, mesmo se o git falhar
+            # Não abortamos aqui para considerar sucesso se os arquivos foram gerados
     else:
-        print("ERRO CRÍTICO: O index.html não foi gerado na oficina.", file=sys.stderr)
+        print("ERRO CRÍTICO: Nenhum arquivo HTML foi gerado na oficina.", file=sys.stderr)
         sys.exit(1)
 
     print("=" * 60)
